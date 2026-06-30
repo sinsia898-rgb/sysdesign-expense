@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>시스디자인 지출결의서</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -155,13 +156,12 @@ tbody td.wrap{white-space:normal;max-width:160px}
 <nav class="nav">
   <div class="nav-logo"><b></b> 시스디자인 지출결의서</div>
   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="switchPage('submit',this)">시재접수</button>
-    <button class="nav-tab" onclick="switchPage('book',this)">도서비</button>
+    <button class="nav-tab active" onclick="switchPage('submit',this)">지출결의서</button>
     <button class="nav-tab" onclick="switchPage('admin',this)">관리자</button>
   </div>
 </nav>
 
-<!-- ===== 시재 접수 ===== -->
+<!-- ===== 지출결의서 접수 (시재 + 도서비 통합) ===== -->
 <div id="page-submit" class="page active">
   <div class="wrap">
     <div class="page-header">
@@ -171,7 +171,7 @@ tbody td.wrap{white-space:normal;max-width:160px}
     <div class="card">
       <div class="card-title">기본 정보</div>
       <div class="form-row">
-        <div class="form-group"><label>제출월</label><input id="s-month" placeholder="예: 6월" maxlength="10"></div>
+        <div class="form-group"><label>지출월</label><input id="s-month" placeholder="예: 6월 사용건 7월 요청건 → 6월" maxlength="20"></div>
         <div class="form-group"><label>작성자</label><input id="s-author" placeholder="예: 이영주" maxlength="20"></div>
       </div>
     </div>
@@ -184,33 +184,8 @@ tbody td.wrap{white-space:normal;max-width:160px}
       <button class="add-row-btn" onclick="addReceiptRow()">+ 영수증 행 추가</button>
       <div class="total-bar"><span class="lbl">합계</span><span class="amt" id="receipt-total">₩0</span></div>
     </div>
-    <div>
-      <div class="monthly-note">
-        <label>당월 시재 요청 총 금액</label>
-        <small>영수증 금액이 아닌 지원요청 금액<br>(예: 영수증 식대 15,000 → 시재요청 10,000)</small>
-        <input type="number" id="s-monthly-total" placeholder="50000" min="0">
-      </div>
-      <button class="btn-submit" onclick="submitReceipt()">제출하기</button>
-    </div>
-  </div>
-</div>
-
-<!-- ===== 도서비 접수 ===== -->
-<div id="page-book" class="page">
-  <div class="wrap">
-    <div class="page-header">
-      <div class="page-title">도서비 지원 접수</div>
-      <div class="page-sub">책 제목·금액·지원비율을 입력하고 한 번에 제출 · 매달 5일까지</div>
-    </div>
     <div class="card">
-      <div class="card-title">기본 정보</div>
-      <div class="form-row">
-        <div class="form-group"><label>제출월</label><input id="b-month" placeholder="예: 6월" maxlength="10"></div>
-        <div class="form-group"><label>작성자</label><input id="b-author" placeholder="예: 이영주" maxlength="20"></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">도서 내역</div>
+      <div class="card-title">도서비 내역 (해당 시 작성)</div>
       <div class="row-header book-hd">
         <span>책 제목</span><span>구매금액</span><span>지원비율</span><span style="text-align:right">지원금액</span><span></span>
       </div>
@@ -218,7 +193,13 @@ tbody td.wrap{white-space:normal;max-width:160px}
       <button class="add-row-btn" onclick="addBookRow()">+ 도서 행 추가</button>
       <div class="total-bar"><span class="lbl">지원 합계</span><span class="amt" id="book-total">₩0</span></div>
     </div>
-    <button class="btn-submit" onclick="submitBook()">도서비 접수하기</button>
+    <div>
+      <div class="monthly-note">
+        <label>당월 시재 요청 총 금액</label>
+        <input type="number" id="s-monthly-total" placeholder="50000" min="0">
+      </div>
+      <button class="btn-submit" onclick="submitAll()">제출하기</button>
+    </div>
   </div>
 </div>
 
@@ -329,6 +310,13 @@ let bookSubs = [];
 let ledger = [];
 
 // ── API HELPERS
+function dateOnly(v) {
+  if (!v) return '';
+  const s = String(v);
+  // ISO 타임스탬프 (2026-02-02T15:00:00.000Z) -> 날짜만 추출
+  const m = s.match(/^(\d{4}-\d{2}-\d{2})/);
+  return m ? m[1] : s;
+}
 async function apiGet(action) {
   const res = await fetch(`${API_URL}?action=${action}`);
   return res.json();
@@ -355,7 +343,7 @@ async function loadReceipts() {
       };
     }
     map[id].items.push({
-      date: r['지출일자'], content: r['지출내용'], place: r['지급처'], amount: Number(r['지출금액']) || 0
+      date: dateOnly(r['지출일자']), content: r['지출내용'], place: r['지급처'], amount: Number(r['지출금액']) || 0
     });
   });
   submissions = Object.values(map);
@@ -376,7 +364,7 @@ async function loadBooks() {
 }
 async function loadLedger() {
   const rows = await apiGet('getLedger');
-  ledger = rows.map(r => ({ id: r['ID'], date: r['날짜'], type: r['구분'], amount: Number(r['금액']) || 0, memo: r['메모'] }));
+  ledger = rows.map(r => ({ id: r['ID'], date: dateOnly(r['날짜']), type: r['구분'], amount: Number(r['금액']) || 0, memo: r['메모'] }));
 }
 
 // ── NAV
@@ -418,12 +406,14 @@ function calcReceipt() {
   const sum = [...document.querySelectorAll('.rc-amt')].reduce((s,i)=>s+parseInt(i.value||0),0);
   document.getElementById('receipt-total').textContent = '₩' + sum.toLocaleString('ko-KR');
 }
-async function submitReceipt() {
+async function submitAll() {
   const month = document.getElementById('s-month').value.trim();
   const author = document.getElementById('s-author').value.trim();
-  if (!month||!author) { showToast('제출월과 작성자를 입력하세요'); return; }
+  if (!month||!author) { showToast('지출월과 작성자를 입력하세요'); return; }
+
   const rowEls = document.querySelectorAll('#receipt-rows .data-row');
-  if (!rowEls.length) { showToast('영수증을 최소 1개 추가하세요'); return; }
+  const bookEls = document.querySelectorAll('#book-rows .data-row');
+
   const items = []; let ok = true;
   rowEls.forEach(r => {
     const date=r.querySelector('.rc-date').value, content=r.querySelector('.rc-content').value.trim(),
@@ -431,20 +421,44 @@ async function submitReceipt() {
     if (!date||!content||!place||!amount) ok=false;
     items.push({date,content,place,amount});
   });
-  if (!ok) { showToast('모든 칸을 채워주세요'); return; }
+
+  const bookItems = []; let bookOk = true;
+  bookEls.forEach(r => {
+    const title=r.querySelector('.bk-title').value.trim(),
+          price=parseInt(r.querySelector('.bk-price').value||0),
+          ratio=parseInt(r.querySelector('.bk-ratio').value),
+          support=parseInt(r.querySelector('.bk-support').value||0);
+    // skip fully empty book rows
+    if (!title && !price) return;
+    if (!title||!price) bookOk=false;
+    bookItems.push({title,price,ratio,support});
+  });
+
+  if (!items.length && !bookItems.length) { showToast('영수증 또는 도서를 1개 이상 추가하세요'); return; }
+  if (items.length && !ok) { showToast('영수증 칸을 모두 채워주세요'); return; }
+  if (!bookOk) { showToast('도서 제목과 금액을 모두 입력하세요'); return; }
+
   const monthlyTotal = parseInt(document.getElementById('s-monthly-total').value||0);
   const btn = event.target; btn.disabled = true; btn.textContent = '제출 중...';
   try {
-    await apiPost({
-      action: 'addReceipt', id: Date.now(), submittedAt: new Date().toISOString(),
-      month, author, items, monthlyTotal, status: 'pending'
-    });
+    const now = new Date().toISOString();
+    if (items.length) {
+      await apiPost({ action: 'addReceipt', id: Date.now(), submittedAt: now, month, author, items, monthlyTotal, status: 'pending' });
+    }
+    if (bookItems.length) {
+      await apiPost({ action: 'addBook', id: Date.now() + 1, submittedAt: now, month, author, items: bookItems, status: 'pending' });
+    }
     document.getElementById('s-month').value='';
     document.getElementById('s-author').value='';
     document.getElementById('s-monthly-total').value='';
     document.getElementById('receipt-rows').innerHTML='';
+    document.getElementById('book-rows').innerHTML='';
     calcReceipt();
-    showToast('✅ 접수 완료! ' + items.length + '건');
+    calcBookTotal();
+    const parts = [];
+    if (items.length) parts.push('영수증 ' + items.length + '건');
+    if (bookItems.length) parts.push('도서 ' + bookItems.length + '권');
+    showToast('✅ 접수 완료! ' + parts.join(' · '));
   } catch(e) {
     showToast('❌ 제출 실패, 다시 시도해주세요');
   } finally {
@@ -484,40 +498,6 @@ function calcBookTotal() {
   const sum = [...document.querySelectorAll('.bk-support')].reduce((s,i)=>s+parseInt(i.value||0),0);
   document.getElementById('book-total').textContent = '₩' + sum.toLocaleString('ko-KR');
 }
-async function submitBook() {
-  const month = document.getElementById('b-month').value.trim();
-  const author = document.getElementById('b-author').value.trim();
-  if (!month||!author) { showToast('제출월과 작성자를 입력하세요'); return; }
-  const rowEls = document.querySelectorAll('#book-rows .data-row');
-  if (!rowEls.length) { showToast('도서를 최소 1개 추가하세요'); return; }
-  const items = []; let ok = true;
-  rowEls.forEach(r => {
-    const title=r.querySelector('.bk-title').value.trim(),
-          price=parseInt(r.querySelector('.bk-price').value||0),
-          ratio=parseInt(r.querySelector('.bk-ratio').value),
-          support=parseInt(r.querySelector('.bk-support').value||0);
-    if (!title||!price) ok=false;
-    items.push({title,price,ratio,support});
-  });
-  if (!ok) { showToast('책 제목과 금액을 모두 입력하세요'); return; }
-  const btn = event.target; btn.disabled = true; btn.textContent = '제출 중...';
-  try {
-    await apiPost({
-      action: 'addBook', id: Date.now(), submittedAt: new Date().toISOString(),
-      month, author, items, status: 'pending'
-    });
-    document.getElementById('b-month').value='';
-    document.getElementById('b-author').value='';
-    document.getElementById('book-rows').innerHTML='';
-    calcBookTotal();
-    showToast('✅ 도서비 접수 완료! ' + items.length + '권');
-  } catch(e) {
-    showToast('❌ 제출 실패, 다시 시도해주세요');
-  } finally {
-    btn.disabled = false; btn.textContent = '도서비 접수하기';
-  }
-}
-
 // ── ADMIN
 let adminLoggedIn = false;
 function adminLogin() {
@@ -627,7 +607,7 @@ async function setBookStatus(id,status) {
   await apiPost({ action: 'updateStatus', sheetName: '도서비접수', id, status });
 }
 
-// ── EXCEL
+// ── EXCEL (SIA 양식)
 function dlCSV(rows, filename) {
   const BOM='\uFEFF';
   const csv = BOM + rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\r\n');
@@ -636,20 +616,111 @@ function dlCSV(rows, filename) {
   a.download = filename; a.click();
   showToast('📥 다운로드 완료');
 }
-function exportReceipts() {
-  const fm=document.getElementById('f-month').value, fs=document.getElementById('f-status').value;
-  let data=submissions;
-  if(fm) data=data.filter(s=>s.month===fm);
-  if(fs) data=data.filter(s=>s.status===fs);
-  const ko={pending:'대기',paid:'지급완료',rejected:'반려'};
-  const rows=[['제출월','작성자','지출일자','지출내용','지급처','지출금액','시재요청금액','상태','접수일시']];
-  data.forEach(sub=>sub.items.forEach((item,idx)=>rows.push([
-    sub.month,sub.author,item.date,item.content,item.place,item.amount,
-    idx===0?sub.monthlyTotal:'', idx===0?ko[sub.status]:'',
-    idx===0?new Date(sub.submittedAt).toLocaleString('ko-KR'):''
-  ])));
-  dlCSV(rows,`시스디자인_지출결의서_${fm||'전체'}.csv`);
+
+function parseMonthLabel(m) {
+  // "6월" -> {year: 현재해, month: 6} 단순 추출, 숫자만 뽑음
+  const n = parseInt(String(m).replace(/[^0-9]/g,''));
+  return n || 0;
 }
+
+function buildExpenseSheetRows(month) {
+  // 해당 월의 시재접수 + 도서비접수 데이터를 합쳐서 SIA 양식 행 배열로 변환
+  const receiptSubs = submissions.filter(s => s.month === month);
+  const bookSubsForMonth = bookSubs.filter(s => s.month === month);
+
+  // flatten: {author, date, amount, content, place, doc}
+  const flat = [];
+  receiptSubs.forEach(sub => {
+    sub.items.forEach(item => {
+      flat.push({
+        author: sub.author,
+        date: item.date,
+        amount: item.amount,
+        content: item.content,
+        place: item.place,
+        doc: '영수증'
+      });
+    });
+  });
+  bookSubsForMonth.forEach(sub => {
+    sub.items.forEach(item => {
+      flat.push({
+        author: sub.author,
+        date: sub.submittedAt ? sub.submittedAt.split('T')[0] : '',
+        amount: item.support,
+        content: `도서비 [${item.title}] ${item.ratio}% 지원`,
+        place: '',
+        doc: '영수증'
+      });
+    });
+  });
+  // 날짜순 정렬
+  flat.sort((a,b) => String(a.date).localeCompare(String(b.date)));
+
+  const monthNum = parseMonthLabel(month);
+  const aoa = [];
+  for (let i=0;i<3;i++) aoa.push([]);
+  aoa[1][1] = `${monthNum}월 사무실 지출결의서`;
+  aoa.push([]); // row4
+  aoa.push([]); // row5
+  const totalAmount = flat.reduce((s,x)=>s+x.amount,0);
+  const totalRow = [];
+  totalRow[1] = `${monthNum}월 총 지출계 :`;
+  totalRow[5] = totalAmount;
+  aoa.push(totalRow); // row6
+  const noteRow = []; noteRow[1] = '지급일자, 시제인출 기준으로 작성';
+  aoa.push(noteRow); // row7
+  const carryRow = []; carryRow[8] = '이월금액'; carryRow[9] = 0;
+  aoa.push(carryRow); // row8
+  const headerRow = [];
+  headerRow[1]='작성자'; headerRow[3]='작성일자'; headerRow[5]='지급일자'; headerRow[7]='지출금액';
+  headerRow[8]='시제인출'; headerRow[9]='잔액'; headerRow[10]='내용'; headerRow[12]='지급처';
+  headerRow[14]='증빙서류'; headerRow[16]='비고';
+  aoa.push(headerRow); // row9
+
+  let balance = 0; // 이월금액 0부터 시작 (필요시 수동 수정)
+  flat.forEach((item, idx) => {
+    const row = [];
+    row[1] = item.author;
+    row[3] = item.date;
+    row[7] = item.amount;
+    balance = balance - item.amount;
+    row[9] = balance;
+    row[10] = item.content;
+    row[12] = item.place;
+    row[14] = item.doc;
+    aoa.push(row);
+  });
+
+  const sumRow = [];
+  sumRow[1] = `${monthNum}월 합계`;
+  sumRow[7] = totalAmount;
+  sumRow[9] = balance;
+  sumRow[10] = '실제 가지고 있는 현금';
+  aoa.push(sumRow);
+  const balRow = []; balRow[1] = '잔액';
+  aoa.push(balRow);
+
+  return aoa;
+}
+
+function exportReceipts() {
+  const fm = document.getElementById('f-month').value;
+  if (!fm) { showToast('월을 먼저 선택해주세요 (엑셀은 월별로 다운로드됩니다)'); return; }
+  const aoa = buildExpenseSheetRows(fm);
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!merges'] = [
+    { s:{r:1,c:1}, e:{r:2,c:7} },
+    { s:{r:5,c:5}, e:{r:5,c:7} }
+  ];
+  ws['!cols'] = [{wch:2},{wch:10},{wch:2},{wch:12},{wch:2},{wch:12},{wch:2},{wch:11},
+                 {wch:11},{wch:11},{wch:28},{wch:2},{wch:12},{wch:2},{wch:10},{wch:2},{wch:10}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, fm + ' 지출결의서');
+  XLSX.writeFile(wb, `시스디자인_${fm}_지출결의서.xlsx`);
+  showToast('📥 다운로드 완료');
+}
+
 function exportBooks() {
   const fm=document.getElementById('bf-month').value, fs=document.getElementById('bf-status').value;
   let data=bookSubs;
@@ -719,7 +790,6 @@ function showToast(msg) {
 // ── INIT
 document.getElementById('l-date').value = new Date().toISOString().split('T')[0];
 addReceiptRow();
-addBookRow();
 </script>
 </body>
 </html>
