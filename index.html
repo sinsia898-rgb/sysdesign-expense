@@ -12,82 +12,105 @@
   --gray-700:#4a4a4a;--gray-400:#9a9a9a;--gray-200:#e8e8e8;
   --gray-100:#f5f5f5;--white:#fff;--red:#e74c3c;--green:#27ae60;--blue:#2980b9;
 }
-body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(--gray-100);color:var(--black);min-height:100vh;font-size:14px}
+body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(--gray-100);color:var(--black);min-height:100vh;font-size:17px}
 
 /* NAV */
-.nav{background:var(--black);padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:100}
-.nav-logo{font-size:13px;font-weight:700;color:#fff;display:flex;align-items:center;gap:7px}
-.nav-logo b{display:inline-block;width:7px;height:7px;background:var(--brand);border-radius:50%}
+.nav{background:var(--black);padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:14px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px}
+.nav-logo b{display:inline-block;width:8px;height:8px;background:var(--brand);border-radius:50%}
 .nav-tabs{display:flex;gap:3px}
-.nav-tab{padding:6px 12px;border-radius:6px;border:none;background:transparent;color:var(--gray-400);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.nav-tab{padding:8px 14px;border-radius:8px;border:none;background:transparent;color:var(--gray-400);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
 .nav-tab.active{background:var(--brand);color:var(--black)}
 
-/* PAGES */
 .page{display:none}.page.active{display:block}
+.wrap{max-width:560px;margin:0 auto;padding:20px 16px 100px}
+.admin-wrap{max-width:960px;margin:0 auto;padding:24px 16px 80px;font-size:14px}
 
-/* WRAP */
-.wrap{max-width:680px;margin:0 auto;padding:24px 16px 80px}
-.admin-wrap{max-width:960px;margin:0 auto;padding:24px 16px 80px}
+/* PROGRESS */
+.progress{display:flex;gap:6px;margin-bottom:24px}
+.progress-step{flex:1;height:6px;border-radius:100px;background:var(--gray-200);transition:background .3s}
+.progress-step.done{background:var(--brand)}
+.step-label{text-align:center;font-size:15px;color:var(--gray-400);font-weight:700;margin-bottom:6px}
 
-/* PAGE HEADER */
+/* STEPS */
+.step{display:none;animation:fadeIn .25s}
+.step.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.step-title{font-size:24px;font-weight:800;margin-bottom:8px;line-height:1.3}
+.step-desc{font-size:16px;color:var(--gray-700);margin-bottom:24px;line-height:1.6}
+
+.big-label{font-size:17px;font-weight:800;color:var(--black);display:block;margin-bottom:8px}
+.big-input,.big-select{width:100%;border:2px solid var(--gray-200);border-radius:14px;padding:16px 18px;font-size:19px;font-family:inherit;background:#fff;margin-bottom:20px;transition:border-color .15s;color:var(--black)}
+.big-input:focus,.big-select:focus{outline:none;border-color:var(--brand)}
+.big-input::placeholder{color:#bbb;font-size:17px}
+.hint{font-size:14px;color:var(--gray-400);margin:-14px 0 20px;line-height:1.5}
+
+/* 구분 카드 */
+.division-cards{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
+.division-card{border:2.5px solid var(--gray-200);border-radius:16px;padding:20px;background:#fff;cursor:pointer;font-size:19px;font-weight:700;text-align:center;font-family:inherit;transition:all .15s;color:var(--gray-700)}
+.division-card.selected{border-color:var(--brand);background:#fdfbe8;color:var(--black)}
+
+/* 지점 그리드 */
+.store-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.store-btn{border:2.5px solid var(--gray-200);border-radius:14px;padding:16px 10px;background:#fff;cursor:pointer;font-size:16px;font-weight:700;font-family:inherit;transition:all .15s;color:var(--gray-700)}
+.store-btn.selected{border-color:var(--blue);background:#e3f0fc;color:var(--blue)}
+.store-btn:last-child{grid-column:1 / -1}
+
+/* 지출종류 토글 */
+.type-toggle{display:flex;gap:10px;margin-bottom:16px}
+.type-btn{flex:1;border:2.5px solid var(--gray-200);border-radius:14px;padding:14px;background:#fff;cursor:pointer;font-size:16px;font-weight:700;font-family:inherit;transition:all .15s;color:var(--gray-700)}
+.type-btn.selected{border-color:var(--brand);background:#fdfbe8;color:var(--black)}
+
+/* 도서 필드 */
+.book-fields{display:none;background:#f0f7ff;border:2px solid #cce0f5;border-radius:14px;padding:16px;margin-bottom:14px}
+.book-fields.show{display:block}
+.book-fields .big-label{font-size:15px}
+.book-fields .big-input{background:#fff;margin-bottom:8px;padding:14px 16px;font-size:18px}
+.book-note{font-size:14px;color:var(--blue);font-weight:700;margin-bottom:4px}
+
+/* 영수증 카드 */
+.receipt-card{background:#fff;border:2px solid var(--gray-200);border-radius:16px;padding:20px;padding-top:26px;margin-bottom:18px;position:relative}
+.receipt-card .num{position:absolute;top:-12px;left:16px;background:var(--black);color:var(--brand);font-size:14px;font-weight:800;border-radius:100px;padding:4px 14px}
+.receipt-card .del{position:absolute;top:-12px;right:12px;background:#fde8e8;color:var(--red);border:none;border-radius:100px;padding:4px 14px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.receipt-card .big-input,.receipt-card .big-select{margin-bottom:14px;padding:14px 16px;font-size:18px}
+.receipt-card .big-label{font-size:15px;margin-bottom:6px}
+
+.photo-attach{width:100%;border:2.5px dashed var(--gray-200);border-radius:14px;padding:18px;background:transparent;font-size:17px;font-weight:700;color:var(--gray-700);cursor:pointer;font-family:inherit;transition:all .15s}
+.photo-attach.attached{border-color:var(--green);background:#effaf3;color:var(--green)}
+
+.add-big-btn{width:100%;border:2.5px dashed var(--brand);border-radius:16px;padding:20px;background:#fdfbe8;font-size:18px;font-weight:800;color:var(--black);cursor:pointer;font-family:inherit;margin-bottom:20px}
+
+.total-display{background:var(--black);border-radius:16px;padding:20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.total-display .lbl{font-size:16px;font-weight:700;color:var(--gray-400)}
+.total-display .amt{font-size:26px;font-weight:800;color:var(--brand)}
+
+/* 확인 */
+.confirm-box{background:#fff;border-radius:16px;padding:22px;margin-bottom:14px;border:2px solid var(--gray-200)}
+.confirm-box h4{font-size:15px;color:var(--gray-400);font-weight:700;margin-bottom:10px}
+.confirm-box .crow{display:flex;justify-content:space-between;padding:8px 0;font-size:17px;border-bottom:1px solid var(--gray-100);gap:10px}
+.confirm-box .crow:last-child{border:none}
+.confirm-box .crow b{font-weight:800;white-space:nowrap}
+.book-tag{display:inline-block;background:#e3f0fc;color:var(--blue);font-size:13px;font-weight:800;border-radius:100px;padding:2px 10px;margin-left:6px}
+
+/* 스텝 네비 */
+.step-nav{display:flex;gap:10px;margin-top:8px}
+.btn-prev{flex:1;padding:18px;border:2px solid var(--gray-200);border-radius:16px;background:#fff;font-size:18px;font-weight:700;color:var(--gray-700);cursor:pointer;font-family:inherit}
+.btn-next{flex:2;padding:18px;border:none;border-radius:16px;background:var(--brand);font-size:19px;font-weight:800;color:var(--black);cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-next:disabled{opacity:.5;cursor:default}
+.btn-next.green{background:var(--green);color:#fff}
+
+.done-screen{text-align:center;padding:60px 20px}
+.done-screen .emoji{font-size:64px;margin-bottom:20px}
+.done-screen h2{font-size:26px;font-weight:800;margin-bottom:12px}
+.done-screen p{font-size:17px;color:var(--gray-700);line-height:1.6;margin-bottom:30px}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--black);color:#fff;padding:14px 24px;border-radius:100px;font-size:16px;font-weight:600;transition:transform .3s;z-index:999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ===== 관리자 (PC 기준, 기존 스타일) ===== */
 .page-title{font-size:20px;font-weight:800}
 .page-sub{font-size:12px;color:var(--gray-400);margin-top:4px}
 .page-header{margin-bottom:20px}
-
-/* CARD */
-.card{background:#fff;border-radius:12px;padding:20px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.card-title{font-size:11px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
-
-/* FORM */
-.form-row{display:flex;gap:10px;margin-bottom:12px}
-.form-group{flex:1;display:flex;flex-direction:column;gap:5px}
-.form-group label{font-size:11px;font-weight:700;color:var(--gray-700)}
-.form-group input,.form-group select{border:1.5px solid var(--gray-200);border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;color:var(--black);background:#fff;transition:border-color .15s;width:100%}
-.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--brand)}
-.form-group input::placeholder{color:var(--gray-400)}
-
-/* RECEIPT ROWS */
-.row-header{display:grid;gap:6px;padding:0 2px;margin-bottom:6px}
-.row-header span{font-size:10px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.05em}
-.receipt-hd{grid-template-columns:1fr 90px 90px 80px 28px}
-.book-hd{grid-template-columns:1fr 90px 90px 80px 28px}
-
-.data-row{display:grid;gap:6px;margin-bottom:6px;align-items:center}
-.receipt-dr{grid-template-columns:1fr 90px 90px 80px 28px}
-.book-dr{grid-template-columns:1fr 90px 90px 80px 28px}
-
-.data-row input,.data-row select{border:1.5px solid var(--gray-200);border-radius:7px;padding:8px 10px;font-size:13px;font-family:inherit;color:var(--black);width:100%;transition:border-color .15s}
-.data-row input:focus,.data-row select:focus{outline:none;border-color:var(--brand)}
-.data-row input::placeholder{color:var(--gray-400);font-size:12px}
-.data-row input[type=number]{text-align:right}
-.row-divider{height:1px;background:var(--gray-100);margin:8px 0}
-
-.btn-del{width:28px;height:28px;border:none;background:var(--gray-200);border-radius:6px;cursor:pointer;color:var(--gray-400);font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
-.btn-del:hover{background:#fde8e8;color:var(--red)}
-
-.add-row-btn{width:100%;padding:10px;border:2px dashed var(--gray-200);border-radius:8px;background:transparent;color:var(--gray-400);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;margin-top:6px}
-.add-row-btn:hover{border-color:var(--brand);color:var(--black);background:#fafae8}
-
-.total-bar{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--black);border-radius:10px;margin-top:12px}
-.total-bar .lbl{font-size:12px;font-weight:700;color:var(--gray-400)}
-.total-bar .amt{font-size:18px;font-weight:800;color:var(--brand);font-variant-numeric:tabular-nums}
-
-/* MONTHLY NOTE */
-.monthly-note{background:#fafae8;border:1.5px solid var(--brand);border-radius:10px;padding:14px;margin-bottom:12px}
-.monthly-note label{font-size:11px;font-weight:700;color:var(--gray-700);display:block;margin-bottom:4px}
-.monthly-note small{display:block;font-size:11px;color:var(--gray-400);margin-bottom:8px;line-height:1.5}
-.monthly-note input{border:1.5px solid var(--brand);border-radius:7px;padding:9px 12px;font-size:14px;font-family:inherit;width:100%;background:#fff;color:var(--black)}
-.monthly-note input:focus{outline:none}
-
-/* BTN SUBMIT */
-.btn-submit{width:100%;padding:16px;background:var(--brand);border:none;border-radius:12px;font-size:15px;font-weight:800;color:var(--black);cursor:pointer;transition:all .15s;font-family:inherit}
-.btn-submit:hover{background:var(--brand-dark);transform:translateY(-1px)}
-
-/* TOAST */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--black);color:#fff;padding:12px 20px;border-radius:100px;font-size:13px;font-weight:600;transition:transform .3s;z-index:999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.2)}
-.toast.show{transform:translateX(-50%) translateY(0)}
-
-/* LOGIN */
 .login-wrap{max-width:360px;margin:80px auto 0;padding:0 16px}
 .login-card{background:#fff;border-radius:16px;padding:32px 24px;box-shadow:0 2px 16px rgba(0,0,0,.08);text-align:center}
 .login-card h2{font-size:18px;font-weight:800;margin-bottom:6px}
@@ -96,59 +119,52 @@ body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(
 .login-card input:focus{outline:none;border-color:var(--brand)}
 .login-card button{width:100%;padding:12px;background:var(--brand);border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
 .login-error{color:var(--red);font-size:12px;margin-top:8px}
-
-/* ADMIN SUBTABS */
 .subtabs{display:flex;gap:4px;margin-bottom:16px;background:#fff;border-radius:10px;padding:4px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .subtab{flex:1;padding:9px;border:none;background:transparent;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--gray-400);transition:all .15s}
 .subtab.active{background:var(--black);color:var(--brand)}
 .subpage{display:none}.subpage.active{display:block}
-
-/* STATS */
 .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
 .stat-card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .stat-label{font-size:11px;color:var(--gray-400);font-weight:600}
 .stat-value{font-size:20px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums}
 .sv-yellow{color:var(--brand-dark)}.sv-red{color:var(--red)}.sv-green{color:var(--green)}
-
-/* FILTER BAR */
 .filter-bar{background:#fff;border-radius:12px;padding:12px 16px;margin-bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .filter-bar select,.filter-bar input{border:1.5px solid var(--gray-200);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;color:var(--black);background:#fff}
-.filter-bar select:focus,.filter-bar input:focus{outline:none;border-color:var(--brand)}
+.filter-bar select:focus{outline:none;border-color:var(--brand)}
 .spacer{flex:1}
 .btn-excel{padding:8px 14px;background:var(--green);border:none;border-radius:7px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
-.btn-excel:hover{opacity:.85}
-
-/* TABLE */
 .table-wrap{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 table{width:100%;border-collapse:collapse;font-size:13px}
 thead tr{background:var(--black);color:#fff}
-thead th{padding:10px 12px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.04em;white-space:nowrap}
+thead th{padding:10px 12px;text-align:left;font-size:11px;font-weight:700;white-space:nowrap}
 tbody tr{border-bottom:1px solid var(--gray-100)}
 tbody tr:hover{background:var(--gray-100)}
 tbody td{padding:10px 12px;vertical-align:middle;white-space:nowrap}
 tbody td.wrap{white-space:normal;max-width:160px}
 .empty-state{padding:40px;text-align:center;color:var(--gray-400);font-size:13px}
-
-/* BADGE */
 .badge{display:inline-block;padding:3px 8px;border-radius:100px;font-size:11px;font-weight:700}
 .badge-pending{background:#fff3cd;color:#856404}
 .badge-paid{background:#d4edda;color:#155724}
 .badge-rejected{background:#f8d7da;color:#721c24}
-
-/* BTN SM */
 .btn-sm{padding:4px 10px;border-radius:6px;border:none;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
 .btn-pay{background:var(--green);color:#fff}
 .btn-reject{background:var(--red);color:#fff}
 .btn-undo{background:var(--gray-200);color:var(--gray-700)}
-
-/* LEDGER */
 .ledger-form{background:#fff;border-radius:12px;padding:20px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .ledger-form h3{font-size:13px;font-weight:700;margin-bottom:14px;color:var(--gray-700)}
 .ledger-row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
-.ledger-row .form-group{flex:1;min-width:110px}
+.ledger-row .form-group{flex:1;min-width:110px;display:flex;flex-direction:column;gap:5px}
+.ledger-row label{font-size:11px;font-weight:700;color:var(--gray-700)}
+.ledger-row input,.ledger-row select{border:1.5px solid var(--gray-200);border-radius:7px;padding:8px 10px;font-size:13px;font-family:inherit}
 .btn-add{padding:9px 16px;background:var(--black);border:none;border-radius:8px;color:var(--brand);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;height:38px;white-space:nowrap}
 .amount-pos{color:var(--blue);font-weight:700}
 .amount-neg{color:var(--red);font-weight:700}
+
+@media (max-width:600px){
+  .stats-grid{grid-template-columns:1fr}
+  .table-wrap{overflow-x:auto}
+  table{min-width:800px}
+}
 </style>
 </head>
 <body>
@@ -156,49 +172,97 @@ tbody td.wrap{white-space:normal;max-width:160px}
 <nav class="nav">
   <div class="nav-logo"><b></b> 시스디자인 지출결의서</div>
   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="switchPage('submit',this)">지출결의서</button>
-    <button class="nav-tab" onclick="switchPage('admin',this)">관리자</button>
+    <button class="nav-tab active" id="tab-submit" onclick="switchPage('submit',this)">접수</button>
+    <button class="nav-tab" id="tab-admin" onclick="switchPage('admin',this)">관리자</button>
   </div>
 </nav>
 
-<!-- ===== 지출결의서 접수 (시재 + 도서비 통합) ===== -->
+<!-- ===== 접수 (위저드) ===== -->
 <div id="page-submit" class="page active">
   <div class="wrap">
-    <div class="page-header">
-      <div class="page-title">지출결의서 접수</div>
-      <div class="page-sub">영수증이 여러 장이면 행 추가 후 한 번에 제출 · 매달 5일까지</div>
+    <div class="step-label" id="step-label">1 / 3 단계</div>
+    <div class="progress">
+      <div class="progress-step done" id="pg-1"></div>
+      <div class="progress-step" id="pg-2"></div>
+      <div class="progress-step" id="pg-3"></div>
     </div>
-    <div class="card">
-      <div class="card-title">기본 정보</div>
-      <div class="form-row">
-        <div class="form-group"><label>지출월</label><input id="s-month" placeholder="예: 6월 사용건 7월 요청건 → 6월" maxlength="20"></div>
-        <div class="form-group"><label>작성자</label><input id="s-author" placeholder="예: 이영주" maxlength="20"></div>
+
+    <!-- STEP 1 -->
+    <div class="step active" id="step-1">
+      <div class="step-title">안녕하세요! 👋<br>먼저 기본 정보를 알려주세요</div>
+      <div class="step-desc">이름과 지출한 달을 입력해주세요.</div>
+
+      <label class="big-label">이름</label>
+      <input class="big-input" id="w-author" placeholder="예: 홍길동" maxlength="20">
+
+      <label class="big-label">언제 지출하셨나요?</label>
+      <select class="big-select" id="w-month">
+        <option value="">달을 선택해주세요</option>
+        <option>1월</option><option>2월</option><option>3월</option>
+        <option>4월</option><option>5월</option><option>6월</option>
+        <option>7월</option><option>8월</option><option>9월</option>
+        <option>10월</option><option>11월</option><option>12월</option>
+      </select>
+      <div class="hint">💡 6월에 쓴 돈을 7월에 접수해도 "6월"을 선택하세요</div>
+
+      <label class="big-label">어디 소속이신가요?</label>
+      <div class="division-cards">
+        <button class="division-card" id="div-office" onclick="selectDivision('office')">🏢 사무실 · 직영쇼룸</button>
+        <button class="division-card" id="div-dept" onclick="selectDivision('dept')">🏬 백화점</button>
+      </div>
+
+      <div id="store-select" style="display:none">
+        <label class="big-label">지점을 선택해주세요</label>
+        <div class="store-grid" id="store-grid"></div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-next" onclick="goStep2()">다음 →</button>
       </div>
     </div>
-    <div class="card">
-      <div class="card-title">영수증 내역</div>
-      <div class="row-header receipt-hd">
-        <span>지출일자</span><span>지출내용</span><span>지급처</span><span style="text-align:right">지출금액</span><span></span>
+
+    <!-- STEP 2 -->
+    <div class="step" id="step-2">
+      <div class="step-title">🧾 영수증을 입력해주세요</div>
+      <div class="step-desc">영수증 <b>1장마다 카드 1개</b>를 작성해주세요.<br>책을 구매하셨다면 <b>"📚 도서 구입"</b>을 선택하시면 돼요.</div>
+
+      <div id="w-receipts"></div>
+
+      <button class="add-big-btn" onclick="addCard()">➕ 영수증 더 추가하기</button>
+
+      <div class="total-display"><span class="lbl">지금까지 합계</span><span class="amt" id="w-total">₩0</span></div>
+
+      <div class="step-nav">
+        <button class="btn-prev" onclick="goStep(1)">← 이전</button>
+        <button class="btn-next" onclick="goStep3()">다음 →</button>
       </div>
-      <div id="receipt-rows"></div>
-      <button class="add-row-btn" onclick="addReceiptRow()">+ 영수증 행 추가</button>
-      <div class="total-bar"><span class="lbl">합계</span><span class="amt" id="receipt-total">₩0</span></div>
     </div>
-    <div class="card">
-      <div class="card-title">도서비 내역 (해당 시 작성)</div>
-      <div class="row-header book-hd">
-        <span>책 제목</span><span>구매금액</span><span>지원비율</span><span style="text-align:right">지원금액</span><span></span>
+
+    <!-- STEP 3 -->
+    <div class="step" id="step-3">
+      <div class="step-title">✅ 마지막으로 확인해주세요</div>
+      <div class="step-desc">아래 내용이 맞는지 확인 후 제출 버튼을 눌러주세요.</div>
+
+      <div id="confirm-area"></div>
+
+      <label class="big-label">이번 달 시재 요청 총 금액</label>
+      <input type="number" class="big-input" id="w-monthly-total" placeholder="예: 50000" min="0">
+      <div class="hint" id="monthly-hint">💡 회사에 요청할 금액을 적어주세요.</div>
+
+      <div class="step-nav">
+        <button class="btn-prev" onclick="goStep(2)">← 이전</button>
+        <button class="btn-next green" id="btn-submit" onclick="submitAll()">📨 제출하기</button>
       </div>
-      <div id="book-rows"></div>
-      <button class="add-row-btn" onclick="addBookRow()">+ 도서 행 추가</button>
-      <div class="total-bar"><span class="lbl">지원 합계</span><span class="amt" id="book-total">₩0</span></div>
     </div>
-    <div>
-      <div class="monthly-note">
-        <label>당월 시재 요청 총 금액</label>
-        <input type="number" id="s-monthly-total" placeholder="50000" min="0">
+
+    <!-- STEP 4: 완료 -->
+    <div class="step" id="step-4">
+      <div class="done-screen">
+        <div class="emoji">🎉</div>
+        <h2>접수 완료!</h2>
+        <p id="done-msg"></p>
+        <button class="btn-next" style="width:100%" onclick="resetWizard()">처음으로 돌아가기</button>
       </div>
-      <button class="btn-submit" onclick="submitAll()">제출하기</button>
     </div>
   </div>
 </div>
@@ -231,6 +295,11 @@ tbody td.wrap{white-space:normal;max-width:160px}
         <div class="stats-grid" id="receipt-stats"></div>
         <div class="filter-bar">
           <select id="f-month" onchange="renderReceipts()"><option value="">전체 월</option></select>
+          <select id="f-division" onchange="renderReceipts()">
+            <option value="">전체 구분</option>
+            <option value="사무실+직영쇼룸">사무실+직영쇼룸</option>
+            <option value="백화점">백화점</option>
+          </select>
           <select id="f-status" onchange="renderReceipts()">
             <option value="">전체 상태</option>
             <option value="pending">대기</option><option value="paid">지급완료</option><option value="rejected">반려</option>
@@ -240,7 +309,7 @@ tbody td.wrap{white-space:normal;max-width:160px}
         </div>
         <div class="table-wrap">
           <table><thead><tr>
-            <th>제출월</th><th>작성자</th><th>지출일자</th><th>지출내용</th><th>지급처</th>
+            <th>제출월</th><th>작성자</th><th>지출일자</th><th>지출내용</th><th>지급처</th><th>사진</th>
             <th style="text-align:right">지출금액</th><th style="text-align:right">요청금액</th><th>상태</th><th>처리</th>
           </tr></thead><tbody id="receipt-tbody"></tbody></table>
           <div class="empty-state" id="receipt-empty" style="display:none">접수된 내역이 없습니다</div>
@@ -252,6 +321,11 @@ tbody td.wrap{white-space:normal;max-width:160px}
         <div class="stats-grid" id="book-stats"></div>
         <div class="filter-bar">
           <select id="bf-month" onchange="renderBooks()"><option value="">전체 월</option></select>
+          <select id="bf-division" onchange="renderBooks()">
+            <option value="">전체 구분</option>
+            <option value="사무실+직영쇼룸">사무실+직영쇼룸</option>
+            <option value="백화점">백화점</option>
+          </select>
           <select id="bf-status" onchange="renderBooks()">
             <option value="">전체 상태</option>
             <option value="pending">대기</option><option value="paid">지급완료</option><option value="rejected">반려</option>
@@ -299,23 +373,24 @@ tbody td.wrap{white-space:normal;max-width:160px}
   </div>
 </div>
 
+
 <div class="toast" id="toast"></div>
 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyszZdZzNexza30CagR-EI_L3y-YPESeww7pKhoQvc8-Qxm2DXXjdcqgRvp_FekcUjp4Q/exec';
 const ADMIN_PW = '1234';
+const STORES = ['롯데일산','롯데광주','롯데수원','롯데동탄','롯데대전','롯데대구','롯데김포','롯데광복','롯데몰 메종동부산'];
+const BOOK_RATIO = 50; // 도서 지원 비율 (%)
 
 let submissions = [];
 let bookSubs = [];
 let ledger = [];
 
-// ── API HELPERS
+// ── API
 function dateOnly(v) {
   if (!v) return '';
-  const s = String(v);
-  // ISO 타임스탬프 (2026-02-02T15:00:00.000Z) -> 날짜만 추출
-  const m = s.match(/^(\d{4}-\d{2}-\d{2})/);
-  return m ? m[1] : s;
+  const m = String(v).match(/^(\d{4}-\d{2}-\d{2})/);
+  return m ? m[1] : String(v);
 }
 async function apiGet(action) {
   const res = await fetch(`${API_URL}?action=${action}`);
@@ -330,7 +405,298 @@ async function apiPost(payload) {
   return res.json();
 }
 
-// ── DATA LOADING (groups flat sheet rows back into submissions)
+// ── NAV
+function switchPage(p, btn) {
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-' + p).classList.add('active');
+  btn.classList.add('active');
+  if (p === 'admin') renderAdmin();
+}
+
+// ── 위저드 상태
+let wDivision = ''; // '사무실+직영쇼룸' | '백화점'
+let wStore = '';
+let cardId = 0;
+const cardPhotos = {};
+
+// 지점 그리드 생성
+const storeGrid = document.getElementById('store-grid');
+STORES.forEach(s => {
+  const b = document.createElement('button');
+  b.className = 'store-btn';
+  b.textContent = s;
+  b.onclick = () => {
+    document.querySelectorAll('.store-btn').forEach(x => x.classList.remove('selected'));
+    b.classList.add('selected');
+    wStore = s;
+  };
+  storeGrid.appendChild(b);
+});
+
+function selectDivision(type) {
+  document.getElementById('div-office').classList.toggle('selected', type === 'office');
+  document.getElementById('div-dept').classList.toggle('selected', type === 'dept');
+  wDivision = type === 'office' ? '사무실+직영쇼룸' : '백화점';
+  document.getElementById('store-select').style.display = type === 'dept' ? 'block' : 'none';
+  if (type === 'office') { wStore = ''; document.querySelectorAll('.store-btn').forEach(x => x.classList.remove('selected')); }
+}
+
+function goStep(n) {
+  document.querySelectorAll('#page-submit .step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  for (let i = 1; i <= 3; i++) {
+    document.getElementById('pg-' + i).classList.toggle('done', i <= Math.min(n, 3));
+  }
+  document.getElementById('step-label').textContent = Math.min(n, 3) + ' / 3 단계';
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function goStep2() {
+  const author = document.getElementById('w-author').value.trim();
+  const month = document.getElementById('w-month').value;
+  if (!author) { showToast('이름을 입력해주세요'); return; }
+  if (!month) { showToast('지출한 달을 선택해주세요'); return; }
+  if (!wDivision) { showToast('소속을 선택해주세요'); return; }
+  if (wDivision === '백화점' && !wStore) { showToast('지점을 선택해주세요'); return; }
+  if (!document.querySelectorAll('#w-receipts .receipt-card').length) addCard();
+  goStep(2);
+}
+
+// ── 영수증 카드
+function addCard() {
+  const id = cardId++;
+  const div = document.createElement('div');
+  div.className = 'receipt-card';
+  div.id = 'card-' + id;
+  div.innerHTML = `
+    <span class="num">영수증 <span class="card-no"></span></span>
+    <button class="del" onclick="delCard(${id})">삭제</button>
+    <label class="big-label">지출 종류</label>
+    <div class="type-toggle">
+      <button class="type-btn selected" onclick="setType(${id}, false, this)">🧾 일반 지출</button>
+      <button class="type-btn" onclick="setType(${id}, true, this)">📚 도서 구입</button>
+    </div>
+    <div class="book-fields" id="bf-${id}">
+      <div class="book-note">📚 도서 구입은 50% 지원돼요</div>
+      <label class="big-label">책 제목</label>
+      <input class="big-input bk-title" placeholder="예: 좋은 디자인이란 무엇인가">
+    </div>
+    <label class="big-label">언제 쓰셨나요?</label>
+    <input type="date" class="big-input rc-date">
+    <label class="big-label">무엇에 쓰셨나요?</label>
+    <input class="big-input rc-content" placeholder="예: 사무실 간식">
+    <label class="big-label">어디서 쓰셨나요?</label>
+    <input class="big-input rc-place" placeholder="예: GS25">
+    <label class="big-label">얼마를 쓰셨나요?</label>
+    <input type="number" class="big-input rc-amt" placeholder="예: 15000" min="0" oninput="calcTotal()">
+    <input type="file" accept="image/*" capture="environment" id="ph-${id}" style="display:none" onchange="attachPhoto(${id}, this)">
+    <button type="button" class="photo-attach" id="ph-btn-${id}" onclick="document.getElementById('ph-${id}').click()">📷 영수증 사진 찍기</button>
+  `;
+  div.dataset.isBook = 'false';
+  document.getElementById('w-receipts').appendChild(div);
+  renumber();
+}
+
+function delCard(id) {
+  delete cardPhotos[id];
+  const el = document.getElementById('card-' + id);
+  if (el) el.remove();
+  renumber(); calcTotal();
+}
+
+function renumber() {
+  document.querySelectorAll('#w-receipts .receipt-card').forEach((c, i) => {
+    c.querySelector('.card-no').textContent = i + 1;
+  });
+}
+
+function setType(id, isBook, btn) {
+  const card = document.getElementById('card-' + id);
+  card.dataset.isBook = isBook ? 'true' : 'false';
+  btn.parentElement.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('bf-' + id).classList.toggle('show', isBook);
+  const contentInput = card.querySelector('.rc-content');
+  if (isBook) {
+    if (!contentInput.value) contentInput.value = '도서 구입';
+    showToast('📚 책 제목을 입력해주세요 (50% 지원)');
+  }
+  calcTotal();
+}
+
+async function attachPhoto(id, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const btn = document.getElementById('ph-btn-' + id);
+  btn.textContent = '사진 처리 중...';
+  try {
+    const base64 = await compressImage(file, 1200, 0.7);
+    cardPhotos[id] = base64;
+    btn.classList.add('attached');
+    btn.textContent = '✅ 사진 첨부 완료 (다시 누르면 변경)';
+    showToast('사진이 첨부되었어요!');
+  } catch(e) {
+    btn.textContent = '📷 영수증 사진 찍기';
+    showToast('❌ 사진 처리 실패, 다시 시도해주세요');
+  }
+}
+
+function compressImage(file, maxWidth, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function calcTotal() {
+  let sum = 0;
+  document.querySelectorAll('#w-receipts .rc-amt').forEach(i => sum += parseInt(i.value || 0));
+  document.getElementById('w-total').textContent = '₩' + sum.toLocaleString('ko-KR');
+}
+
+// ── 카드 수집/검증
+function collectCards() {
+  const cards = document.querySelectorAll('#w-receipts .receipt-card');
+  const items = [];
+  let error = '';
+  cards.forEach((card, i) => {
+    const isBook = card.dataset.isBook === 'true';
+    const date = card.querySelector('.rc-date').value;
+    const content = card.querySelector('.rc-content').value.trim();
+    const place = card.querySelector('.rc-place').value.trim();
+    const amount = parseInt(card.querySelector('.rc-amt').value || 0);
+    const bookTitle = isBook ? card.querySelector('.bk-title').value.trim() : '';
+    const id = parseInt(card.id.replace('card-',''));
+    if (!date || !content || !place || !amount) error = error || `영수증 ${i+1}의 빈칸을 채워주세요`;
+    if (isBook && !bookTitle) error = error || `영수증 ${i+1}의 책 제목을 입력해주세요`;
+    items.push({ isBook, date, content, place, amount, bookTitle, photo: cardPhotos[id] || '' });
+  });
+  return { items, error };
+}
+
+function goStep3() {
+  const { items, error } = collectCards();
+  if (!items.length) { showToast('영수증을 1개 이상 작성해주세요'); return; }
+  if (error) { showToast(error); return; }
+  buildConfirm(items);
+  goStep(3);
+}
+
+function buildConfirm(items) {
+  const author = document.getElementById('w-author').value.trim();
+  const month = document.getElementById('w-month').value;
+  const divText = wDivision === '백화점' ? '백화점 · ' + wStore : '사무실 · 직영쇼룸';
+  const total = items.reduce((s, x) => s + x.amount, 0);
+  const bookItems = items.filter(x => x.isBook);
+
+  let html = `
+    <div class="confirm-box">
+      <h4>기본 정보</h4>
+      <div class="crow"><span>이름</span><b>${author}</b></div>
+      <div class="crow"><span>지출월</span><b>${month}</b></div>
+      <div class="crow"><span>소속</span><b>${divText}</b></div>
+    </div>
+    <div class="confirm-box">
+      <h4>영수증 ${items.length}건</h4>`;
+  items.forEach(x => {
+    const label = x.isBook
+      ? `${x.bookTitle} <span class="book-tag">📚 도서 50%</span>`
+      : `${x.content} (${x.place})`;
+    html += `<div class="crow"><span>${label}</span><b>₩${x.amount.toLocaleString('ko-KR')}</b></div>`;
+  });
+  html += `<div class="crow"><span>합계</span><b style="color:var(--red)">₩${total.toLocaleString('ko-KR')}</b></div></div>`;
+  document.getElementById('confirm-area').innerHTML = html;
+
+  // 시재요청 힌트: 도서 50% 반영한 권장금액
+  let suggested = 0;
+  items.forEach(x => suggested += x.isBook ? Math.floor(x.amount * BOOK_RATIO / 100) : x.amount);
+  document.getElementById('w-monthly-total').value = suggested;
+  const hint = bookItems.length
+    ? `💡 도서는 50%만 지원돼요. 권장 금액 ₩${suggested.toLocaleString('ko-KR')}을 미리 넣어드렸어요. 필요하면 수정하세요.`
+    : `💡 회사에 요청할 금액이에요. 영수증 합계를 미리 넣어드렸어요. 필요하면 수정하세요.`;
+  document.getElementById('monthly-hint').textContent = hint;
+}
+
+// ── 제출
+async function submitAll() {
+  const { items, error } = collectCards();
+  if (error) { showToast(error); goStep(2); return; }
+  const author = document.getElementById('w-author').value.trim();
+  const month = document.getElementById('w-month').value;
+  const monthlyTotal = parseInt(document.getElementById('w-monthly-total').value || 0);
+  if (!monthlyTotal) { showToast('시재 요청 금액을 입력해주세요'); return; }
+
+  const division = wDivision === '백화점' ? '백화점 · ' + wStore : '사무실+직영쇼룸';
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true; btn.textContent = '제출 중...';
+
+  try {
+    const now = new Date().toISOString();
+    // 시재접수: 모든 항목 (도서 포함 - content에 표시)
+    const receiptItems = items.map(x => ({
+      date: x.date,
+      content: x.isBook ? `도서비 [${x.bookTitle}]` : x.content,
+      place: x.place,
+      amount: x.amount,
+      photo: x.photo
+    }));
+    await apiPost({ action: 'addReceipt', id: Date.now(), submittedAt: now, month, author, division, items: receiptItems, monthlyTotal, status: 'pending' });
+
+    // 도서비접수: 도서 항목만 별도 저장
+    const bookItems = items.filter(x => x.isBook).map(x => ({
+      title: x.bookTitle,
+      price: x.amount,
+      ratio: BOOK_RATIO,
+      support: Math.floor(x.amount * BOOK_RATIO / 100)
+    }));
+    if (bookItems.length) {
+      await apiPost({ action: 'addBook', id: Date.now() + 1, submittedAt: now, month, author, division, items: bookItems, status: 'pending' });
+    }
+
+    const total = items.reduce((s, x) => s + x.amount, 0);
+    document.getElementById('done-msg').innerHTML =
+      `${author}님의 ${month} 지출결의서가<br>정상적으로 접수되었습니다.<br><br>영수증 ${items.length}건` +
+      (bookItems.length ? ` (도서 ${bookItems.length}건 포함)` : '') +
+      ` · ₩${total.toLocaleString('ko-KR')}`;
+    document.querySelectorAll('#page-submit .step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step-4').classList.add('active');
+    window.scrollTo({top: 0});
+  } catch(e) {
+    showToast('❌ 제출 실패, 다시 시도해주세요');
+  } finally {
+    btn.disabled = false; btn.textContent = '📨 제출하기';
+  }
+}
+
+function resetWizard() {
+  document.getElementById('w-author').value = '';
+  document.getElementById('w-month').value = '';
+  document.getElementById('w-monthly-total').value = '';
+  document.getElementById('w-receipts').innerHTML = '';
+  Object.keys(cardPhotos).forEach(k => delete cardPhotos[k]);
+  wDivision = ''; wStore = '';
+  document.querySelectorAll('.division-card, .store-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('store-select').style.display = 'none';
+  calcTotal();
+  goStep(1);
+}
+
+// ── 데이터 로드
 async function loadReceipts() {
   const rows = await apiGet('getReceipts');
   const map = {};
@@ -339,11 +705,12 @@ async function loadReceipts() {
     if (!map[id]) {
       map[id] = {
         id, submittedAt: r['제출일시'], month: r['제출월'], author: r['작성자'],
-        items: [], monthlyTotal: Number(r['요청금액']) || 0, status: r['상태'] || 'pending'
+        division: r['구분'] || '', items: [], monthlyTotal: Number(r['요청금액']) || 0, status: r['상태'] || 'pending'
       };
     }
     map[id].items.push({
-      date: dateOnly(r['지출일자']), content: r['지출내용'], place: r['지급처'], amount: Number(r['지출금액']) || 0
+      date: dateOnly(r['지출일자']), content: r['지출내용'], place: r['지급처'],
+      amount: Number(r['지출금액']) || 0, photoUrl: r['사진'] || ''
     });
   });
   submissions = Object.values(map);
@@ -354,7 +721,7 @@ async function loadBooks() {
   rows.forEach(r => {
     const id = r['접수ID'];
     if (!map[id]) {
-      map[id] = { id, submittedAt: r['제출일시'], month: r['제출월'], author: r['작성자'], items: [], status: r['상태'] || 'pending' };
+      map[id] = { id, submittedAt: r['제출일시'], month: r['제출월'], author: r['작성자'], division: r['구분'] || '', items: [], status: r['상태'] || 'pending' };
     }
     map[id].items.push({
       title: r['책제목'], price: Number(r['구매금액']) || 0, ratio: Number(r['지원비율']) || 0, support: Number(r['지원금액']) || 0
@@ -367,138 +734,7 @@ async function loadLedger() {
   ledger = rows.map(r => ({ id: r['ID'], date: dateOnly(r['날짜']), type: r['구분'], amount: Number(r['금액']) || 0, memo: r['메모'] }));
 }
 
-// ── NAV
-function switchPage(p, btn) {
-  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
-  document.getElementById('page-' + p).classList.add('active');
-  btn.classList.add('active');
-  if (p === 'admin') renderAdmin();
-}
-function switchSub(p, btn) {
-  document.querySelectorAll('.subpage').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.subtab').forEach(el => el.classList.remove('active'));
-  document.getElementById('sub-' + p).classList.add('active');
-  btn.classList.add('active');
-  if (p === 'ledger') renderLedger();
-  if (p === 'receipts') renderReceipts();
-  if (p === 'books') renderBooks();
-}
-
-// ── RECEIPT ROWS
-let rId = 0;
-function addReceiptRow(date='',content='',place='',amount='') {
-  const id = rId++;
-  const div = document.createElement('div');
-  div.id = 'rr-' + id;
-  div.innerHTML = `
-    <div class="data-row receipt-dr">
-      <input type="date" class="rc-date" value="${date}" oninput="calcReceipt()">
-      <input class="rc-content" value="${content}" placeholder="식비, 교통비">
-      <input class="rc-place" value="${place}" placeholder="GS25">
-      <input type="number" class="rc-amt" value="${amount}" placeholder="0" min="0" oninput="calcReceipt()">
-      <button class="btn-del" onclick="document.getElementById('rr-${id}').remove();calcReceipt()">×</button>
-    </div><div class="row-divider"></div>`;
-  document.getElementById('receipt-rows').appendChild(div);
-  calcReceipt();
-}
-function calcReceipt() {
-  const sum = [...document.querySelectorAll('.rc-amt')].reduce((s,i)=>s+parseInt(i.value||0),0);
-  document.getElementById('receipt-total').textContent = '₩' + sum.toLocaleString('ko-KR');
-}
-async function submitAll() {
-  const month = document.getElementById('s-month').value.trim();
-  const author = document.getElementById('s-author').value.trim();
-  if (!month||!author) { showToast('지출월과 작성자를 입력하세요'); return; }
-
-  const rowEls = document.querySelectorAll('#receipt-rows .data-row');
-  const bookEls = document.querySelectorAll('#book-rows .data-row');
-
-  const items = []; let ok = true;
-  rowEls.forEach(r => {
-    const date=r.querySelector('.rc-date').value, content=r.querySelector('.rc-content').value.trim(),
-          place=r.querySelector('.rc-place').value.trim(), amount=parseInt(r.querySelector('.rc-amt').value||0);
-    if (!date||!content||!place||!amount) ok=false;
-    items.push({date,content,place,amount});
-  });
-
-  const bookItems = []; let bookOk = true;
-  bookEls.forEach(r => {
-    const title=r.querySelector('.bk-title').value.trim(),
-          price=parseInt(r.querySelector('.bk-price').value||0),
-          ratio=parseInt(r.querySelector('.bk-ratio').value),
-          support=parseInt(r.querySelector('.bk-support').value||0);
-    // skip fully empty book rows
-    if (!title && !price) return;
-    if (!title||!price) bookOk=false;
-    bookItems.push({title,price,ratio,support});
-  });
-
-  if (!items.length && !bookItems.length) { showToast('영수증 또는 도서를 1개 이상 추가하세요'); return; }
-  if (items.length && !ok) { showToast('영수증 칸을 모두 채워주세요'); return; }
-  if (!bookOk) { showToast('도서 제목과 금액을 모두 입력하세요'); return; }
-
-  const monthlyTotal = parseInt(document.getElementById('s-monthly-total').value||0);
-  const btn = event.target; btn.disabled = true; btn.textContent = '제출 중...';
-  try {
-    const now = new Date().toISOString();
-    if (items.length) {
-      await apiPost({ action: 'addReceipt', id: Date.now(), submittedAt: now, month, author, items, monthlyTotal, status: 'pending' });
-    }
-    if (bookItems.length) {
-      await apiPost({ action: 'addBook', id: Date.now() + 1, submittedAt: now, month, author, items: bookItems, status: 'pending' });
-    }
-    document.getElementById('s-month').value='';
-    document.getElementById('s-author').value='';
-    document.getElementById('s-monthly-total').value='';
-    document.getElementById('receipt-rows').innerHTML='';
-    document.getElementById('book-rows').innerHTML='';
-    calcReceipt();
-    calcBookTotal();
-    const parts = [];
-    if (items.length) parts.push('영수증 ' + items.length + '건');
-    if (bookItems.length) parts.push('도서 ' + bookItems.length + '권');
-    showToast('✅ 접수 완료! ' + parts.join(' · '));
-  } catch(e) {
-    showToast('❌ 제출 실패, 다시 시도해주세요');
-  } finally {
-    btn.disabled = false; btn.textContent = '제출하기';
-  }
-}
-
-// ── BOOK ROWS
-let bId = 0;
-function addBookRow(title='',price='',ratio='50') {
-  const id = bId++;
-  const div = document.createElement('div');
-  div.id = 'br-' + id;
-  div.innerHTML = `
-    <div class="data-row book-dr">
-      <input class="bk-title" value="${title}" placeholder="책 제목">
-      <input type="number" class="bk-price" value="${price}" placeholder="0" min="0" oninput="calcBook(${id})">
-      <select class="bk-ratio" onchange="calcBook(${id})">
-        <option value="50" ${ratio=='50'?'selected':''}>50%</option>
-        <option value="100" ${ratio=='100'?'selected':''}>100%</option>
-      </select>
-      <input type="number" class="bk-support" placeholder="0" readonly style="text-align:right;background:#f9f9f9">
-      <button class="btn-del" onclick="document.getElementById('br-${id}').remove();calcBookTotal()">×</button>
-    </div><div class="row-divider"></div>`;
-  document.getElementById('book-rows').appendChild(div);
-  calcBook(id);
-}
-function calcBook(id) {
-  const row = document.getElementById('br-' + id);
-  if (!row) return;
-  const price = parseInt(row.querySelector('.bk-price').value||0);
-  const ratio = parseInt(row.querySelector('.bk-ratio').value);
-  row.querySelector('.bk-support').value = Math.floor(price * ratio / 100);
-  calcBookTotal();
-}
-function calcBookTotal() {
-  const sum = [...document.querySelectorAll('.bk-support')].reduce((s,i)=>s+parseInt(i.value||0),0);
-  document.getElementById('book-total').textContent = '₩' + sum.toLocaleString('ko-KR');
-}
-// ── ADMIN
+// ── 관리자
 let adminLoggedIn = false;
 function adminLogin() {
   if (document.getElementById('admin-pw').value === ADMIN_PW) {
@@ -522,11 +758,23 @@ async function renderAdmin() {
   renderReceipts(); renderBooks(); renderLedger();
   showToast('✅ 최신 데이터 로드 완료');
 }
+function switchSub(p, btn) {
+  document.querySelectorAll('.subpage').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.subtab').forEach(el => el.classList.remove('active'));
+  document.getElementById('sub-' + p).classList.add('active');
+  btn.classList.add('active');
+}
 
-// ── RECEIPT ADMIN
+// 구분 매칭: '백화점' 필터는 '백화점 · 롯데동탄' 등 모두 포함
+function matchDivision(subDiv, filter) {
+  if (!filter) return true;
+  return String(subDiv).startsWith(filter);
+}
+
 function renderReceipts() {
   const fm = document.getElementById('f-month').value;
   const fs = document.getElementById('f-status').value;
+  const fd = document.getElementById('f-division').value;
   const months = [...new Set(submissions.map(s=>s.month))].sort();
   const sel = document.getElementById('f-month');
   sel.innerHTML = '<option value="">전체 월</option>' + months.map(m=>`<option value="${m}"${m===fm?' selected':''}>${m}</option>`).join('');
@@ -534,6 +782,7 @@ function renderReceipts() {
   let data = submissions;
   if (fm) data = data.filter(s=>s.month===fm);
   if (fs) data = data.filter(s=>s.status===fs);
+  if (fd) data = data.filter(s=>matchDivision(s.division, fd));
 
   const pending = submissions.filter(s=>s.status==='pending');
   const paid = submissions.filter(s=>s.status==='paid');
@@ -553,8 +802,9 @@ function renderReceipts() {
     ? `<button class="btn-sm btn-pay" onclick="setReceiptStatus('${sub.id}','paid')">지급</button> <button class="btn-sm btn-reject" onclick="setReceiptStatus('${sub.id}','rejected')">반려</button>`
     : `<button class="btn-sm btn-undo" onclick="setReceiptStatus('${sub.id}','pending')">되돌리기</button>`;
   tbody.innerHTML = flat.map(({sub,item,idx,rowspan}) => `<tr>
-    ${idx===0?`<td rowspan="${rowspan}">${sub.month}</td><td rowspan="${rowspan}">${sub.author}</td>`:''}
+    ${idx===0?`<td rowspan="${rowspan}">${sub.month}<br><small style="color:var(--gray-400)">${sub.division||''}</small></td><td rowspan="${rowspan}">${sub.author}</td>`:''}
     <td>${item.date}</td><td class="wrap">${item.content}</td><td>${item.place}</td>
+    <td>${item.photoUrl && item.photoUrl !== '업로드실패' ? `<a href="${item.photoUrl}" target="_blank" style="color:var(--blue);font-weight:700;text-decoration:none">🧾 보기</a>` : '-'}</td>
     <td style="text-align:right">₩${item.amount.toLocaleString('ko-KR')}</td>
     ${idx===0?`<td rowspan="${rowspan}" style="text-align:right;font-weight:700">₩${sub.monthlyTotal.toLocaleString('ko-KR')}</td><td rowspan="${rowspan}">${sl[sub.status]}</td><td rowspan="${rowspan}">${ab(sub)}</td>`:''}
   </tr>`).join('');
@@ -564,10 +814,10 @@ async function setReceiptStatus(id,status) {
   await apiPost({ action: 'updateStatus', sheetName: '시재접수', id, status });
 }
 
-// ── BOOK ADMIN
 function renderBooks() {
   const fm = document.getElementById('bf-month').value;
   const fs = document.getElementById('bf-status').value;
+  const fd = document.getElementById('bf-division').value;
   const months = [...new Set(bookSubs.map(s=>s.month))].sort();
   const sel = document.getElementById('bf-month');
   sel.innerHTML = '<option value="">전체 월</option>' + months.map(m=>`<option value="${m}"${m===fm?' selected':''}>${m}</option>`).join('');
@@ -575,13 +825,15 @@ function renderBooks() {
   let data = bookSubs;
   if (fm) data = data.filter(s=>s.month===fm);
   if (fs) data = data.filter(s=>s.status===fs);
+  if (fd) data = data.filter(s=>matchDivision(s.division, fd));
 
   const pending = bookSubs.filter(s=>s.status==='pending');
   const paid = bookSubs.filter(s=>s.status==='paid');
+  const sumSupport = arr => arr.reduce((s,x)=>s+x.items.reduce((a,i)=>a+i.support,0),0);
   document.getElementById('book-stats').innerHTML = `
     <div class="stat-card"><div class="stat-label">대기 건수</div><div class="stat-value sv-yellow">${pending.length}건</div></div>
-    <div class="stat-card"><div class="stat-label">대기 금액</div><div class="stat-value sv-red">₩${pending.reduce((s,x)=>s+x.totalSupport,0).toLocaleString('ko-KR')}</div></div>
-    <div class="stat-card"><div class="stat-label">지급 완료</div><div class="stat-value sv-green">₩${paid.reduce((s,x)=>s+x.totalSupport,0).toLocaleString('ko-KR')}</div></div>`;
+    <div class="stat-card"><div class="stat-label">대기 금액</div><div class="stat-value sv-red">₩${sumSupport(pending).toLocaleString('ko-KR')}</div></div>
+    <div class="stat-card"><div class="stat-label">지급 완료</div><div class="stat-value sv-green">₩${sumSupport(paid).toLocaleString('ko-KR')}</div></div>`;
 
   const flat = [];
   data.forEach(sub => sub.items.forEach((item,idx) => flat.push({sub,item,idx,rowspan:sub.items.length})));
@@ -594,7 +846,7 @@ function renderBooks() {
     ? `<button class="btn-sm btn-pay" onclick="setBookStatus('${sub.id}','paid')">지급</button> <button class="btn-sm btn-reject" onclick="setBookStatus('${sub.id}','rejected')">반려</button>`
     : `<button class="btn-sm btn-undo" onclick="setBookStatus('${sub.id}','pending')">되돌리기</button>`;
   tbody.innerHTML = flat.map(({sub,item,idx,rowspan}) => `<tr>
-    ${idx===0?`<td rowspan="${rowspan}">${sub.month}</td><td rowspan="${rowspan}">${sub.author}</td>`:''}
+    ${idx===0?`<td rowspan="${rowspan}">${sub.month}<br><small style="color:var(--gray-400)">${sub.division||''}</small></td><td rowspan="${rowspan}">${sub.author}</td>`:''}
     <td class="wrap">${item.title}</td>
     <td style="text-align:right">₩${item.price.toLocaleString('ko-KR')}</td>
     <td>${item.ratio}%</td>
@@ -607,7 +859,7 @@ async function setBookStatus(id,status) {
   await apiPost({ action: 'updateStatus', sheetName: '도서비접수', id, status });
 }
 
-// ── EXCEL (SIA 양식)
+// ── 엑셀
 function dlCSV(rows, filename) {
   const BOM='\uFEFF';
   const csv = BOM + rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\r\n');
@@ -616,126 +868,88 @@ function dlCSV(rows, filename) {
   a.download = filename; a.click();
   showToast('📥 다운로드 완료');
 }
-
 function parseMonthLabel(m) {
-  // "6월" -> {year: 현재해, month: 6} 단순 추출, 숫자만 뽑음
   const n = parseInt(String(m).replace(/[^0-9]/g,''));
   return n || 0;
 }
+function buildExpenseSheetRows(month, division) {
+  let receiptSubs = submissions.filter(s => s.month === month);
+  if (division) receiptSubs = receiptSubs.filter(s => matchDivision(s.division, division));
 
-function buildExpenseSheetRows(month) {
-  // 해당 월의 시재접수 + 도서비접수 데이터를 합쳐서 SIA 양식 행 배열로 변환
-  const receiptSubs = submissions.filter(s => s.month === month);
-  const bookSubsForMonth = bookSubs.filter(s => s.month === month);
-
-  // flatten: {author, date, amount, content, place, doc}
   const flat = [];
   receiptSubs.forEach(sub => {
     sub.items.forEach(item => {
-      flat.push({
-        author: sub.author,
-        date: item.date,
-        amount: item.amount,
-        content: item.content,
-        place: item.place,
-        doc: '영수증'
-      });
+      flat.push({ author: sub.author, date: item.date, amount: item.amount, content: item.content, place: item.place, doc: '영수증' });
     });
   });
-  bookSubsForMonth.forEach(sub => {
-    sub.items.forEach(item => {
-      flat.push({
-        author: sub.author,
-        date: sub.submittedAt ? sub.submittedAt.split('T')[0] : '',
-        amount: item.support,
-        content: `도서비 [${item.title}] ${item.ratio}% 지원`,
-        place: '',
-        doc: '영수증'
-      });
-    });
-  });
-  // 날짜순 정렬
   flat.sort((a,b) => String(a.date).localeCompare(String(b.date)));
 
   const monthNum = parseMonthLabel(month);
+  const divLabel = division === '백화점' ? '백화점' : division === '사무실+직영쇼룸' ? '사무실' : '사무실';
+  const titleLabel = `${monthNum}월 ${divLabel} 지출결의서`;
   const aoa = [];
   for (let i=0;i<3;i++) aoa.push([]);
-  aoa[1][1] = `${monthNum}월 사무실 지출결의서`;
-  aoa.push([]); // row4
-  aoa.push([]); // row5
+  aoa[1][1] = titleLabel;
+  aoa.push([]); aoa.push([]);
   const totalAmount = flat.reduce((s,x)=>s+x.amount,0);
-  const totalRow = [];
-  totalRow[1] = `${monthNum}월 총 지출계 :`;
-  totalRow[5] = totalAmount;
-  aoa.push(totalRow); // row6
+  const totalRow = []; totalRow[1] = `${monthNum}월 총 지출계 :`; totalRow[5] = totalAmount;
+  aoa.push(totalRow);
   const noteRow = []; noteRow[1] = '지급일자, 시제인출 기준으로 작성';
-  aoa.push(noteRow); // row7
+  aoa.push(noteRow);
   const carryRow = []; carryRow[8] = '이월금액'; carryRow[9] = 0;
-  aoa.push(carryRow); // row8
+  aoa.push(carryRow);
   const headerRow = [];
   headerRow[1]='작성자'; headerRow[3]='작성일자'; headerRow[5]='지급일자'; headerRow[7]='지출금액';
   headerRow[8]='시제인출'; headerRow[9]='잔액'; headerRow[10]='내용'; headerRow[12]='지급처';
   headerRow[14]='증빙서류'; headerRow[16]='비고';
-  aoa.push(headerRow); // row9
+  aoa.push(headerRow);
 
-  let balance = 0; // 이월금액 0부터 시작 (필요시 수동 수정)
-  flat.forEach((item, idx) => {
+  let balance = 0;
+  flat.forEach(item => {
     const row = [];
-    row[1] = item.author;
-    row[3] = item.date;
-    row[7] = item.amount;
-    balance = balance - item.amount;
-    row[9] = balance;
-    row[10] = item.content;
-    row[12] = item.place;
-    row[14] = item.doc;
+    row[1] = item.author; row[3] = item.date; row[7] = item.amount;
+    balance -= item.amount;
+    row[9] = balance; row[10] = item.content; row[12] = item.place; row[14] = item.doc;
     aoa.push(row);
   });
-
   const sumRow = [];
-  sumRow[1] = `${monthNum}월 합계`;
-  sumRow[7] = totalAmount;
-  sumRow[9] = balance;
-  sumRow[10] = '실제 가지고 있는 현금';
+  sumRow[1] = `${monthNum}월 합계`; sumRow[7] = totalAmount; sumRow[9] = balance; sumRow[10] = '실제 가지고 있는 현금';
   aoa.push(sumRow);
   const balRow = []; balRow[1] = '잔액';
   aoa.push(balRow);
-
   return aoa;
 }
-
 function exportReceipts() {
   const fm = document.getElementById('f-month').value;
   if (!fm) { showToast('월을 먼저 선택해주세요 (엑셀은 월별로 다운로드됩니다)'); return; }
-  const aoa = buildExpenseSheetRows(fm);
+  const fd = document.getElementById('f-division').value;
+  const aoa = buildExpenseSheetRows(fm, fd);
   const ws = XLSX.utils.aoa_to_sheet(aoa);
-  ws['!merges'] = [
-    { s:{r:1,c:1}, e:{r:2,c:7} },
-    { s:{r:5,c:5}, e:{r:5,c:7} }
-  ];
+  ws['!merges'] = [{ s:{r:1,c:1}, e:{r:2,c:7} },{ s:{r:5,c:5}, e:{r:5,c:7} }];
   ws['!cols'] = [{wch:2},{wch:10},{wch:2},{wch:12},{wch:2},{wch:12},{wch:2},{wch:11},
                  {wch:11},{wch:11},{wch:28},{wch:2},{wch:12},{wch:2},{wch:10},{wch:2},{wch:10}];
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, fm + ' 지출결의서');
-  XLSX.writeFile(wb, `시스디자인_${fm}_지출결의서.xlsx`);
+  const divLabel = fd ? (fd === '백화점' ? '백화점' : '사무실') : '전체';
+  XLSX.utils.book_append_sheet(wb, ws, (fm + ' ' + divLabel).substring(0,30));
+  XLSX.writeFile(wb, `시스디자인_${fm}_${divLabel}_지출결의서.xlsx`);
   showToast('📥 다운로드 완료');
 }
-
 function exportBooks() {
-  const fm=document.getElementById('bf-month').value, fs=document.getElementById('bf-status').value;
+  const fm=document.getElementById('bf-month').value, fs=document.getElementById('bf-status').value, fd=document.getElementById('bf-division').value;
   let data=bookSubs;
   if(fm) data=data.filter(s=>s.month===fm);
   if(fs) data=data.filter(s=>s.status===fs);
+  if(fd) data=data.filter(s=>matchDivision(s.division, fd));
   const ko={pending:'대기',paid:'지급완료',rejected:'반려'};
-  const rows=[['제출월','작성자','책제목','구매금액','지원비율','지원금액','상태','접수일시']];
+  const rows=[['제출월','구분','작성자','책제목','구매금액','지원비율','지원금액','상태','접수일시']];
   data.forEach(sub=>sub.items.forEach((item,idx)=>rows.push([
-    sub.month,sub.author,item.title,item.price,item.ratio+'%',item.support,
+    sub.month,sub.division||'',sub.author,item.title,item.price,item.ratio+'%',item.support,
     idx===0?ko[sub.status]:'', idx===0?new Date(sub.submittedAt).toLocaleString('ko-KR'):''
   ])));
   dlCSV(rows,`시스디자인_도서비_${fm||'전체'}.csv`);
 }
 
-// ── LEDGER
+// ── 장부
 async function addLedger() {
   const date=document.getElementById('l-date').value, type=document.getElementById('l-type').value,
         amount=parseInt(document.getElementById('l-amount').value||0), memo=document.getElementById('l-memo').value.trim();
@@ -789,7 +1003,7 @@ function showToast(msg) {
 
 // ── INIT
 document.getElementById('l-date').value = new Date().toISOString().split('T')[0];
-addReceiptRow();
+addCard();
 </script>
 </body>
 </html>
