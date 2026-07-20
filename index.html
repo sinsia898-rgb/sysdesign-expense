@@ -160,6 +160,16 @@ tbody td.wrap{white-space:normal;max-width:160px}
 .amount-pos{color:var(--blue);font-weight:700}
 .amount-neg{color:var(--red);font-weight:700}
 
+/* 사진 미리보기 */
+.photo-link{position:relative;display:inline-block}
+.photo-link a{color:var(--blue);font-weight:700;text-decoration:none}
+.photo-pop{display:none;position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);z-index:50;background:#fff;border:2px solid var(--gray-200);border-radius:10px;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.photo-link:hover .photo-pop{display:block}
+.photo-pop img{display:block;max-width:320px;max-height:400px;border-radius:6px}
+
+/* 금액 미리보기 */
+.amt-preview{font-size:15px;font-weight:800;color:var(--blue);margin:-10px 0 14px;min-height:20px}
+
 @media (max-width:600px){
   .stats-grid{grid-template-columns:1fr}
   .table-wrap{overflow-x:auto}
@@ -489,7 +499,8 @@ function addCard() {
     <label class="big-label">어디서 쓰셨나요?</label>
     <input class="big-input rc-place" placeholder="예: GS25">
     <label class="big-label">얼마를 쓰셨나요?</label>
-    <input type="number" class="big-input rc-amt" placeholder="예: 15000" min="0" oninput="calcTotal()">
+    <input type="number" class="big-input rc-amt" placeholder="예: 15000" min="0" oninput="calcTotal();showAmtPreview(this)">
+    <div class="amt-preview"></div>
     <input type="file" accept="image/*" id="ph-${id}" style="display:none" onchange="attachPhoto(${id}, this)">
     <button type="button" class="photo-attach" id="ph-btn-${id}" onclick="document.getElementById('ph-${id}').click()">📷 영수증 사진 찍기</button>
   `;
@@ -569,6 +580,20 @@ function calcTotal() {
   document.getElementById('w-total').textContent = '₩' + sum.toLocaleString('ko-KR');
 }
 
+// 금액 실수 방지: 입력하는 즉시 "₩15,000 (만오천 원)" 형태로 보여줌
+function showAmtPreview(input) {
+  const preview = input.nextElementSibling;
+  const n = parseInt(input.value || 0);
+  if (!n) { preview.textContent = ''; return; }
+  preview.textContent = '₩' + n.toLocaleString('ko-KR') + ' (' + koreanAmount(n) + ')';
+}
+function koreanAmount(n) {
+  if (n >= 100000000) return Math.floor(n/100000000) + '억' + (n%100000000 ? ' ' + koreanAmount(n%100000000) : ' 원');
+  if (n >= 10000) return Math.floor(n/10000) + '만' + (n%10000 ? ' ' + koreanAmount(n%10000) : ' 원');
+  if (n >= 1000) return Math.floor(n/1000) + '천' + (n%1000 ? ' ' + koreanAmount(n%1000) : ' 원');
+  return n + ' 원';
+}
+
 // ── 카드 수집/검증
 function collectCards() {
   const cards = document.querySelectorAll('#w-receipts .receipt-card');
@@ -584,6 +609,7 @@ function collectCards() {
     const id = parseInt(card.id.replace('card-',''));
     if (!date || !content || !place || !amount) error = error || `영수증 ${i+1}의 빈칸을 채워주세요`;
     if (isBook && !bookTitle) error = error || `영수증 ${i+1}의 책 제목을 입력해주세요`;
+    if (!cardPhotos[id]) error = error || `영수증 ${i+1}의 사진을 첨부해주세요 📷`;
     items.push({ isBook, date, content, place, amount, bookTitle, photo: cardPhotos[id] || '' });
   });
   return { items, error };
@@ -771,6 +797,18 @@ function matchDivision(subDiv, filter) {
   return String(subDiv).startsWith(filter);
 }
 
+// 사진 셀: 마우스 올리면 미리보기, 클릭하면 원본
+function driveFileId(url) {
+  const m = String(url).match(/\/d\/([a-zA-Z0-9_-]+)/);
+  return m ? m[1] : '';
+}
+function photoCell(url) {
+  if (!url || url === '업로드실패') return '-';
+  const id = driveFileId(url);
+  const thumb = id ? `https://drive.google.com/thumbnail?id=${id}&sz=w400` : '';
+  return `<span class="photo-link"><a href="${url}" target="_blank">🧾 보기</a>${thumb ? `<span class="photo-pop"><img src="${thumb}" loading="lazy"></span>` : ''}</span>`;
+}
+
 function renderReceipts() {
   const fm = document.getElementById('f-month').value;
   const fs = document.getElementById('f-status').value;
@@ -804,7 +842,7 @@ function renderReceipts() {
   tbody.innerHTML = flat.map(({sub,item,idx,rowspan}) => `<tr>
     ${idx===0?`<td rowspan="${rowspan}">${sub.month}<br><small style="color:var(--gray-400)">${sub.division||''}</small></td><td rowspan="${rowspan}">${sub.author}</td>`:''}
     <td>${item.date}</td><td class="wrap">${item.content}</td><td>${item.place}</td>
-    <td>${item.photoUrl && item.photoUrl !== '업로드실패' ? `<a href="${item.photoUrl}" target="_blank" style="color:var(--blue);font-weight:700;text-decoration:none">🧾 보기</a>` : '-'}</td>
+    <td>${photoCell(item.photoUrl)}</td>
     <td style="text-align:right">₩${item.amount.toLocaleString('ko-KR')}</td>
     ${idx===0?`<td rowspan="${rowspan}" style="text-align:right;font-weight:700">₩${sub.monthlyTotal.toLocaleString('ko-KR')}</td><td rowspan="${rowspan}">${sl[sub.status]}</td><td rowspan="${rowspan}">${ab(sub)}</td>`:''}
   </tr>`).join('');
