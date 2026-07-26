@@ -218,7 +218,7 @@ tbody td.wrap{white-space:normal;max-width:160px}
       <label class="big-label">어디 소속이신가요?</label>
       <div class="division-cards">
         <button class="division-card" id="div-office" onclick="selectDivision('office')">🏢 사무실 · 직영쇼룸</button>
-        <button class="division-card" id="div-dept" onclick="selectDivision('dept')">🏬 백화점 · 물류센터</button>
+        <button class="division-card" id="div-dept" onclick="selectDivision('dept')">🏬 백화점</button>
       </div>
 
       <div id="store-select" style="display:none">
@@ -240,7 +240,7 @@ tbody td.wrap{white-space:normal;max-width:160px}
 
       <button class="add-big-btn" onclick="addCard()">➕ 영수증 더 추가하기</button>
 
-      <div class="total-display"><span class="lbl">지금까지 합계</span><span class="amt" id="w-total">₩0</span></div>
+      <div class="total-display"><span class="lbl">지금까지 요청 금액 (도서는 50% 반영)</span><span class="amt" id="w-total">₩0</span></div>
 
       <div class="step-nav">
         <button class="btn-prev" onclick="goStep(1)">← 이전</button>
@@ -389,7 +389,7 @@ tbody td.wrap{white-space:normal;max-width:160px}
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyszZdZzNexza30CagR-EI_L3y-YPESeww7pKhoQvc8-Qxm2DXXjdcqgRvp_FekcUjp4Q/exec';
 const ADMIN_PW = '1234';
-const STORES = ['롯데일산','롯데광주','롯데수원','롯데동탄','롯데대전','롯데대구','롯데김포','롯데광복','롯데몰 메종동부산','물류센터'];
+const STORES = ['롯데일산','롯데광주','롯데수원','롯데동탄','롯데대전','롯데대구','롯데김포','롯데광복','롯데몰 메종동부산'];
 const BOOK_RATIO = 50; // 도서 지원 비율 (%)
 
 let submissions = [];
@@ -533,6 +533,7 @@ function setType(id, isBook, btn) {
     if (!contentInput.value) contentInput.value = '도서 구입';
     showToast('📚 책 제목을 입력해주세요 (50% 지원)');
   }
+  showAmtPreview(card.querySelector('.rc-amt'));
   calcTotal();
 }
 
@@ -576,7 +577,11 @@ function compressImage(file, maxWidth, quality) {
 
 function calcTotal() {
   let sum = 0;
-  document.querySelectorAll('#w-receipts .rc-amt').forEach(i => sum += parseInt(i.value || 0));
+  document.querySelectorAll('#w-receipts .receipt-card').forEach(card => {
+    const amt = parseInt(card.querySelector('.rc-amt').value || 0);
+    const isBook = card.dataset.isBook === 'true';
+    sum += isBook ? Math.floor(amt * BOOK_RATIO / 100) : amt;
+  });
   document.getElementById('w-total').textContent = '₩' + sum.toLocaleString('ko-KR');
 }
 
@@ -585,7 +590,14 @@ function showAmtPreview(input) {
   const preview = input.nextElementSibling;
   const n = parseInt(input.value || 0);
   if (!n) { preview.textContent = ''; return; }
-  preview.textContent = '₩' + n.toLocaleString('ko-KR') + ' (' + koreanAmount(n) + ')';
+  const card = input.closest('.receipt-card');
+  const isBook = card && card.dataset.isBook === 'true';
+  if (isBook) {
+    const support = Math.floor(n * BOOK_RATIO / 100);
+    preview.textContent = '구매 ₩' + n.toLocaleString('ko-KR') + ' → 지원 ₩' + support.toLocaleString('ko-KR') + ' (' + koreanAmount(support) + ')';
+  } else {
+    preview.textContent = '₩' + n.toLocaleString('ko-KR') + ' (' + koreanAmount(n) + ')';
+  }
 }
 function koreanAmount(n) {
   if (n >= 100000000) return Math.floor(n/100000000) + '억' + (n%100000000 ? ' ' + koreanAmount(n%100000000) : ' 원');
@@ -627,7 +639,8 @@ function buildConfirm(items) {
   const author = document.getElementById('w-author').value.trim();
   const month = document.getElementById('w-month').value;
   const divText = wDivision === '백화점' ? '백화점 · ' + wStore : '사무실 · 직영쇼룸';
-  const total = items.reduce((s, x) => s + x.amount, 0);
+  const effAmt = x => x.isBook ? Math.floor(x.amount * BOOK_RATIO / 100) : x.amount;
+  const total = items.reduce((s, x) => s + effAmt(x), 0);
   const bookItems = items.filter(x => x.isBook);
 
   let html = `
@@ -640,20 +653,20 @@ function buildConfirm(items) {
     <div class="confirm-box">
       <h4>영수증 ${items.length}건</h4>`;
   items.forEach(x => {
-    const label = x.isBook
-      ? `${x.bookTitle} <span class="book-tag">📚 도서 50%</span>`
-      : `${x.content} (${x.place})`;
-    html += `<div class="crow"><span>${label}</span><b>₩${x.amount.toLocaleString('ko-KR')}</b></div>`;
+    if (x.isBook) {
+      const support = effAmt(x);
+      html += `<div class="crow"><span>${x.bookTitle} <span class="book-tag">📚 구매 ₩${x.amount.toLocaleString('ko-KR')}의 50%</span></span><b>₩${support.toLocaleString('ko-KR')}</b></div>`;
+    } else {
+      html += `<div class="crow"><span>${x.content} (${x.place})</span><b>₩${x.amount.toLocaleString('ko-KR')}</b></div>`;
+    }
   });
-  html += `<div class="crow"><span>합계</span><b style="color:var(--red)">₩${total.toLocaleString('ko-KR')}</b></div></div>`;
+  html += `<div class="crow"><span>요청 합계</span><b style="color:var(--red)">₩${total.toLocaleString('ko-KR')}</b></div></div>`;
   document.getElementById('confirm-area').innerHTML = html;
 
-  // 시재요청 힌트: 도서 50% 반영한 권장금액
-  let suggested = 0;
-  items.forEach(x => suggested += x.isBook ? Math.floor(x.amount * BOOK_RATIO / 100) : x.amount);
-  document.getElementById('w-monthly-total').value = suggested;
+  // 시재요청 금액 = 지원금 기준 합계
+  document.getElementById('w-monthly-total').value = total;
   const hint = bookItems.length
-    ? `💡 도서는 50%만 지원돼요. 권장 금액 ₩${suggested.toLocaleString('ko-KR')}을 미리 넣어드렸어요. 필요하면 수정하세요.`
+    ? `💡 도서는 지원금(50%)으로 계산된 금액이에요. 필요하면 수정하세요.`
     : `💡 회사에 요청할 금액이에요. 영수증 합계를 미리 넣어드렸어요. 필요하면 수정하세요.`;
   document.getElementById('monthly-hint').textContent = hint;
 }
@@ -673,17 +686,18 @@ async function submitAll() {
 
   try {
     const now = new Date().toISOString();
-    // 시재접수: 모든 항목 (도서 포함 - content에 표시)
+    const effAmt = x => x.isBook ? Math.floor(x.amount * BOOK_RATIO / 100) : x.amount;
+    // 시재접수: 도서는 지원금(50%) 기준으로 기록
     const receiptItems = items.map(x => ({
       date: x.date,
-      content: x.isBook ? `도서비 [${x.bookTitle}]` : x.content,
+      content: x.isBook ? `도서비 [${x.bookTitle}] (구매 ${x.amount.toLocaleString('ko-KR')}원의 50%)` : x.content,
       place: x.place,
-      amount: x.amount,
+      amount: effAmt(x),
       photo: x.photo
     }));
     await apiPost({ action: 'addReceipt', id: Date.now(), submittedAt: now, month, author, division, items: receiptItems, monthlyTotal, status: 'pending' });
 
-    // 도서비접수: 도서 항목만 별도 저장
+    // 도서비접수: 도서 항목만 별도 저장 (구매금액 원가 포함)
     const bookItems = items.filter(x => x.isBook).map(x => ({
       title: x.bookTitle,
       price: x.amount,
@@ -694,7 +708,7 @@ async function submitAll() {
       await apiPost({ action: 'addBook', id: Date.now() + 1, submittedAt: now, month, author, division, items: bookItems, status: 'pending' });
     }
 
-    const total = items.reduce((s, x) => s + x.amount, 0);
+    const total = items.reduce((s, x) => s + effAmt(x), 0);
     document.getElementById('done-msg').innerHTML =
       `${author}님의 ${month} 지출결의서가<br>정상적으로 접수되었습니다.<br><br>영수증 ${items.length}건` +
       (bookItems.length ? ` (도서 ${bookItems.length}건 포함)` : '') +
