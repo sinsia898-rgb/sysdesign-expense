@@ -218,7 +218,7 @@ tbody td.wrap{white-space:normal;max-width:160px}
       <label class="big-label">어디 소속이신가요?</label>
       <div class="division-cards">
         <button class="division-card" id="div-office" onclick="selectDivision('office')">🏢 사무실 · 직영쇼룸</button>
-        <button class="division-card" id="div-dept" onclick="selectDivision('dept')">🏬 백화점 · 물류센터</button>
+        <button class="division-card" id="div-dept" onclick="selectDivision('dept')">🏬 백화점</button>
       </div>
 
       <div id="store-select" style="display:none">
@@ -297,6 +297,8 @@ tbody td.wrap{white-space:normal;max-width:160px}
       <div class="subtabs">
         <button class="subtab active" onclick="switchSub('receipts',this)">시재 내역</button>
         <button class="subtab" onclick="switchSub('books',this)">도서비 내역</button>
+        <button class="subtab" onclick="switchSub('settlement',this)">정산요청</button>
+        <button class="subtab" onclick="switchSub('staff',this)">직원명단</button>
         <button class="subtab" onclick="switchSub('ledger',this)">지출 장부</button>
       </div>
 
@@ -352,6 +354,66 @@ tbody td.wrap{white-space:normal;max-width:160px}
         </div>
       </div>
 
+      <!-- 정산요청 -->
+      <div id="sub-settlement" class="subpage">
+        <div class="filter-bar">
+          <label style="font-size:13px;font-weight:700;color:var(--gray-700)">기준 월</label>
+          <select id="st-month" onchange="renderSettlement()"><option value="">월을 선택하세요</option></select>
+          <div class="spacer"></div>
+          <label style="font-size:13px;color:var(--gray-400)">
+            <input type="checkbox" id="st-pending-only" checked onchange="renderSettlement()"> 지급대기(pending)만 포함
+          </label>
+        </div>
+
+        <div class="card" style="background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <h3 style="font-size:15px;font-weight:800">💵 사무실·직영쇼룸 현금 인출요청서</h3>
+            <button class="btn-excel" onclick="exportCashRequest()">📥 엑셀</button>
+          </div>
+          <div class="table-wrap">
+            <table><thead><tr>
+              <th>작성자</th><th style="text-align:right">요청금액</th>
+              <th style="text-align:right">5만원권</th><th style="text-align:right">1만원권</th><th style="text-align:right">1천원권</th>
+            </tr></thead><tbody id="cash-tbody"></tbody></table>
+            <div class="empty-state" id="cash-empty" style="display:none">해당 월 대기 내역이 없습니다</div>
+          </div>
+        </div>
+
+        <div class="card" style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <h3 style="font-size:15px;font-weight:800">🏦 백화점·물류센터 송금요청서</h3>
+            <button class="btn-excel" onclick="exportTransferRequest()">📥 엑셀</button>
+          </div>
+          <div class="table-wrap">
+            <table><thead><tr><th>지점</th><th style="text-align:right">송금액</th></tr></thead>
+            <tbody id="transfer-tbody"></tbody></table>
+            <div class="empty-state" id="transfer-empty" style="display:none">해당 월 대기 내역이 없습니다</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 직원명단 -->
+      <div id="sub-staff" class="subpage">
+        <div class="ledger-form">
+          <h3>직원 명단 업로드 (엑셀)</h3>
+          <p style="font-size:12px;color:var(--gray-400);margin-bottom:12px">첫 번째 시트 기준, "이름"과 "구분"(사무실+직영쇼룸 / 백화점) 열이 있는 엑셀 파일을 올려주세요. 업로드하면 기존 명단을 덮어씁니다.</p>
+          <input type="file" accept=".xlsx,.xls" id="staff-file" onchange="uploadStaffFile(this)">
+        </div>
+
+        <div class="filter-bar">
+          <label style="font-size:13px;font-weight:700;color:var(--gray-700)">확인할 월</label>
+          <select id="staff-month" onchange="renderStaff()"><option value="">월을 선택하세요</option></select>
+          <div class="spacer"></div>
+          <span style="font-size:13px;color:var(--gray-400)" id="staff-summary"></span>
+        </div>
+
+        <div class="table-wrap">
+          <table><thead><tr><th>이름</th><th>소속</th><th>이번 달 제출 여부</th></tr></thead>
+          <tbody id="staff-tbody"></tbody></table>
+          <div class="empty-state" id="staff-empty" style="display:none">등록된 직원 명단이 없습니다</div>
+        </div>
+      </div>
+
       <!-- 지출 장부 -->
       <div id="sub-ledger" class="subpage">
         <div class="ledger-form">
@@ -389,12 +451,13 @@ tbody td.wrap{white-space:normal;max-width:160px}
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyszZdZzNexza30CagR-EI_L3y-YPESeww7pKhoQvc8-Qxm2DXXjdcqgRvp_FekcUjp4Q/exec';
 const ADMIN_PW = '1234';
-const STORES = ['롯데일산','롯데광주','롯데수원','롯데동탄','롯데대전','롯데대구','롯데김포','롯데광복','롯데몰 메종동부산','물류센터'];
+const STORES = ['롯데일산','롯데광주','롯데수원','롯데동탄','롯데대전','롯데대구','롯데김포','롯데광복','롯데몰 메종동부산'];
 const BOOK_RATIO = 50; // 도서 지원 비율 (%)
 
 let submissions = [];
 let bookSubs = [];
 let ledger = [];
+let staffList = []; // {name, division}
 
 // ── API
 function dateOnly(v) {
@@ -773,6 +836,10 @@ async function loadLedger() {
   const rows = await apiGet('getLedger');
   ledger = rows.map(r => ({ id: r['ID'], date: dateOnly(r['날짜']), type: r['구분'], amount: Number(r['금액']) || 0, memo: r['메모'] }));
 }
+async function loadStaff() {
+  const rows = await apiGet('getStaff');
+  staffList = rows.map(r => ({ name: r['이름'], division: r['구분'] || '' }));
+}
 
 // ── 관리자
 let adminLoggedIn = false;
@@ -794,15 +861,25 @@ function adminLogout() {
 async function renderAdmin() {
   if (!adminLoggedIn) return;
   showToast('데이터 불러오는 중...');
-  await Promise.all([loadReceipts(), loadBooks(), loadLedger()]);
+  await Promise.all([loadReceipts(), loadBooks(), loadLedger(), loadStaff()]);
   renderReceipts(); renderBooks(); renderLedger();
+  buildMonthDropdown('st-month'); buildMonthDropdown('staff-month');
+  renderSettlement(); renderStaff();
   showToast('✅ 최신 데이터 로드 완료');
+}
+function buildMonthDropdown(id) {
+  const months = [...new Set(submissions.map(s=>s.month))].sort();
+  const sel = document.getElementById(id);
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">월을 선택하세요</option>' + months.map(m=>`<option value="${m}"${m===cur?' selected':''}>${m}</option>`).join('');
 }
 function switchSub(p, btn) {
   document.querySelectorAll('.subpage').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.subtab').forEach(el => el.classList.remove('active'));
   document.getElementById('sub-' + p).classList.add('active');
   btn.classList.add('active');
+  if (p === 'settlement') renderSettlement();
+  if (p === 'staff') renderStaff();
 }
 
 // 구분 매칭: '백화점' 필터는 '백화점 · 롯데동탄' 등 모두 포함
@@ -1045,6 +1122,155 @@ function exportLedger() {
     rows.push([e.date,e.type==='in'?'입금':'출금',e.amount,e.memo,bal]);
   });
   dlCSV(rows,'시스디자인_시재장부.csv');
+}
+
+// ── 정산요청 (현금 인출요청서 / 송금요청서)
+function denomBreakdown(amount) {
+  let rem = Math.max(0, Math.round(amount));
+  const c50000 = Math.floor(rem / 50000); rem -= c50000 * 50000;
+  const c10000 = Math.floor(rem / 10000); rem -= c10000 * 10000;
+  const c1000 = Math.floor(rem / 1000); rem -= c1000 * 1000;
+  return { c50000, c10000, c1000, leftover: rem };
+}
+
+function settlementSubs(month) {
+  const pendingOnly = document.getElementById('st-pending-only').checked;
+  let data = submissions.filter(s => s.month === month);
+  if (pendingOnly) data = data.filter(s => s.status === 'pending');
+  return data;
+}
+
+function renderSettlement() {
+  const month = document.getElementById('st-month').value;
+  const cashTbody = document.getElementById('cash-tbody');
+  const cashEmpty = document.getElementById('cash-empty');
+  const transferTbody = document.getElementById('transfer-tbody');
+  const transferEmpty = document.getElementById('transfer-empty');
+
+  if (!month) {
+    cashTbody.innerHTML=''; cashEmpty.style.display='block'; cashEmpty.textContent='월을 선택하세요';
+    transferTbody.innerHTML=''; transferEmpty.style.display='block'; transferEmpty.textContent='월을 선택하세요';
+    return;
+  }
+
+  const data = settlementSubs(month);
+  const officeSubs = data.filter(s => matchDivision(s.division, '사무실+직영쇼룸'));
+  const deptSubs = data.filter(s => matchDivision(s.division, '백화점'));
+
+  // 현금 인출요청서: 작성자별 합산
+  const byAuthor = {};
+  officeSubs.forEach(s => { byAuthor[s.author] = (byAuthor[s.author]||0) + s.monthlyTotal; });
+  const authorRows = Object.entries(byAuthor);
+  if (!authorRows.length) {
+    cashTbody.innerHTML=''; cashEmpty.style.display='block'; cashEmpty.textContent='해당 월 대기 내역이 없습니다';
+  } else {
+    cashEmpty.style.display='none';
+    let gTotal=0,g50=0,g10=0,g1=0;
+    cashTbody.innerHTML = authorRows.map(([author, amt]) => {
+      const d = denomBreakdown(amt);
+      gTotal+=amt; g50+=d.c50000; g10+=d.c10000; g1+=d.c1000;
+      return `<tr><td>${author}</td><td style="text-align:right;font-weight:700">₩${amt.toLocaleString('ko-KR')}</td>
+        <td style="text-align:right">${d.c50000}장</td><td style="text-align:right">${d.c10000}장</td><td style="text-align:right">${d.c1000}장</td></tr>`;
+    }).join('') + `<tr style="background:var(--gray-100);font-weight:800">
+        <td>합계</td><td style="text-align:right">₩${gTotal.toLocaleString('ko-KR')}</td>
+        <td style="text-align:right">${g50}장</td><td style="text-align:right">${g10}장</td><td style="text-align:right">${g1}장</td></tr>`;
+  }
+
+  // 송금요청서: 지점(구분 문자열)별 합산
+  const byStore = {};
+  deptSubs.forEach(s => { const key = s.division || '백화점'; byStore[key] = (byStore[key]||0) + s.monthlyTotal; });
+  const storeRows = Object.entries(byStore);
+  if (!storeRows.length) {
+    transferTbody.innerHTML=''; transferEmpty.style.display='block'; transferEmpty.textContent='해당 월 대기 내역이 없습니다';
+  } else {
+    transferEmpty.style.display='none';
+    let gTotal=0;
+    transferTbody.innerHTML = storeRows.map(([store, amt]) => {
+      gTotal += amt;
+      return `<tr><td>${store}</td><td style="text-align:right;font-weight:700">₩${amt.toLocaleString('ko-KR')}</td></tr>`;
+    }).join('') + `<tr style="background:var(--gray-100);font-weight:800"><td>합계</td><td style="text-align:right">₩${gTotal.toLocaleString('ko-KR')}</td></tr>`;
+  }
+}
+
+function exportCashRequest() {
+  const month = document.getElementById('st-month').value;
+  if (!month) { showToast('월을 먼저 선택해주세요'); return; }
+  const officeSubs = settlementSubs(month).filter(s => matchDivision(s.division, '사무실+직영쇼룸'));
+  const byAuthor = {};
+  officeSubs.forEach(s => { byAuthor[s.author] = (byAuthor[s.author]||0) + s.monthlyTotal; });
+  const rows = [['작성자','요청금액','5만원권','1만원권','1천원권']];
+  let gTotal=0,g50=0,g10=0,g1=0;
+  Object.entries(byAuthor).forEach(([author, amt]) => {
+    const d = denomBreakdown(amt);
+    gTotal+=amt; g50+=d.c50000; g10+=d.c10000; g1+=d.c1000;
+    rows.push([author, amt, d.c50000, d.c10000, d.c1000]);
+  });
+  rows.push(['합계', gTotal, g50, g10, g1]);
+  dlCSV(rows, `시스디자인_${month}_현금인출요청서.csv`);
+}
+
+function exportTransferRequest() {
+  const month = document.getElementById('st-month').value;
+  if (!month) { showToast('월을 먼저 선택해주세요'); return; }
+  const deptSubs = settlementSubs(month).filter(s => matchDivision(s.division, '백화점'));
+  const byStore = {};
+  deptSubs.forEach(s => { const key = s.division || '백화점'; byStore[key] = (byStore[key]||0) + s.monthlyTotal; });
+  const rows = [['지점','송금액']];
+  let gTotal=0;
+  Object.entries(byStore).forEach(([store, amt]) => { gTotal+=amt; rows.push([store, amt]); });
+  rows.push(['합계', gTotal]);
+  dlCSV(rows, `시스디자인_${month}_송금요청서.csv`);
+}
+
+// ── 직원명단
+function uploadStaffFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(ws);
+      const list = json.map(row => ({
+        name: String(row['이름'] || row['name'] || '').trim(),
+        division: String(row['구분'] || row['division'] || '').trim()
+      })).filter(r => r.name);
+      if (!list.length) { showToast('이름 열을 찾을 수 없어요. 헤더를 확인해주세요'); return; }
+      showToast('업로드 중...');
+      await apiPost({ action: 'setStaffList', list });
+      staffList = list;
+      renderStaff();
+      showToast(`✅ 직원 ${list.length}명 등록 완료`);
+    } catch(err) {
+      showToast('❌ 파일을 읽지 못했어요. 엑셀 형식을 확인해주세요');
+    }
+    input.value = '';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function renderStaff() {
+  const month = document.getElementById('staff-month').value;
+  const tbody = document.getElementById('staff-tbody');
+  const empty = document.getElementById('staff-empty');
+  if (!staffList.length) {
+    tbody.innerHTML=''; empty.style.display='block'; empty.textContent='등록된 직원 명단이 없습니다. 위에서 엑셀을 업로드해주세요';
+    document.getElementById('staff-summary').textContent = '';
+    return;
+  }
+  empty.style.display = 'none';
+  const submittedAuthors = month ? new Set(submissions.filter(s => s.month === month).map(s => s.author)) : new Set();
+  let doneCount = 0;
+  tbody.innerHTML = staffList.map(st => {
+    const done = submittedAuthors.has(st.name);
+    if (done) doneCount++;
+    const badge = !month ? '<span style="color:var(--gray-400)">월을 선택하세요</span>'
+      : done ? '<span class="badge badge-paid">✅ 제출완료</span>' : '<span class="badge badge-rejected">❌ 미제출</span>';
+    return `<tr><td>${st.name}</td><td>${st.division}</td><td>${badge}</td></tr>`;
+  }).join('');
+  document.getElementById('staff-summary').textContent = month ? `제출완료 ${doneCount} / 전체 ${staffList.length}명` : '';
 }
 
 // ── TOAST
