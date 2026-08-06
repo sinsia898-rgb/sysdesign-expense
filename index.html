@@ -1151,8 +1151,12 @@ function exportLedger() {
 }
 
 // ── 정산요청 (현금 인출요청서 / 송금요청서)
+// 현금은 1,000원 단위로만 준비하므로, 1,000원 미만 자투리는 절삭(버림)
+function truncateTo1000(amount) {
+  return Math.floor(Math.max(0, amount) / 1000) * 1000;
+}
 function denomBreakdown(amount) {
-  let rem = Math.max(0, Math.round(amount));
+  let rem = truncateTo1000(amount);
   const c50000 = Math.floor(rem / 50000); rem -= c50000 * 50000;
   const c10000 = Math.floor(rem / 10000); rem -= c10000 * 10000;
   const c1000 = Math.floor(rem / 1000); rem -= c1000 * 1000;
@@ -1195,20 +1199,24 @@ function renderSettlement() {
     cashEmpty.style.display='none';
     let gTotal=0,g50=0,g10=0,g1=0;
     cashTbody.innerHTML = authorRows.map(([author, amt]) => {
-      const d = denomBreakdown(amt);
-      gTotal+=amt; g50+=d.c50000; g10+=d.c10000; g1+=d.c1000;
+      const d = denomBreakdown(amt); // 개인 지급용 - 정확한 금액 기준
+      gTotal += amt; g50+=d.c50000; g10+=d.c10000; g1+=d.c1000;
       return `<tr><td>${author}</td><td style="text-align:right;font-weight:700">₩${amt.toLocaleString('ko-KR')}</td>
         <td style="text-align:right">${d.c50000}장</td><td style="text-align:right">${d.c10000}장</td><td style="text-align:right">${d.c1000}장</td></tr>`;
     }).join('') + `<tr style="background:var(--gray-100);font-weight:800">
         <td>합계</td><td style="text-align:right">₩${gTotal.toLocaleString('ko-KR')}</td>
         <td style="text-align:right">${g50}장</td><td style="text-align:right">${g10}장</td><td style="text-align:right">${g1}장</td></tr>`;
 
-    // 권종별 요약: 각 작성자 금액을 개별로 권종 분해한 뒤 장수만 합산 (총 인출 필요 매수 기준)
+    // 권종별 요약: 전체 합계를 1,000원 단위로 절삭한 뒤 한 번에 권종 계산 (개인별과 별개, 은행 인출용)
+    const truncGrand = truncateTo1000(gTotal);
+    const gd = denomBreakdown(truncGrand);
+    const trimmedGrand = gTotal - truncGrand;
     document.getElementById('denom-summary-tbody').innerHTML = `
-      <tr><td>50,000</td><td style="text-align:right">${g50}</td><td style="text-align:right">₩${(g50*50000).toLocaleString('ko-KR')}</td></tr>
-      <tr><td>10,000</td><td style="text-align:right">${g10}</td><td style="text-align:right">₩${(g10*10000).toLocaleString('ko-KR')}</td></tr>
-      <tr><td>1,000</td><td style="text-align:right">${g1}</td><td style="text-align:right">₩${(g1*1000).toLocaleString('ko-KR')}</td></tr>
-      <tr style="background:var(--gray-100);font-weight:800"><td colspan="2"></td><td style="text-align:right">₩${gTotal.toLocaleString('ko-KR')}</td></tr>`;
+      <tr><td>50,000</td><td style="text-align:right">${gd.c50000}</td><td style="text-align:right">₩${(gd.c50000*50000).toLocaleString('ko-KR')}</td></tr>
+      <tr><td>10,000</td><td style="text-align:right">${gd.c10000}</td><td style="text-align:right">₩${(gd.c10000*10000).toLocaleString('ko-KR')}</td></tr>
+      <tr><td>1,000</td><td style="text-align:right">${gd.c1000}</td><td style="text-align:right">₩${(gd.c1000*1000).toLocaleString('ko-KR')}</td></tr>
+      <tr style="background:var(--gray-100);font-weight:800"><td colspan="2"></td><td style="text-align:right">₩${truncGrand.toLocaleString('ko-KR')}</td></tr>
+      ${trimmedGrand > 0 ? `<tr><td colspan="3" style="color:var(--gray-400);font-size:12px">* 실제 요청 합계 ₩${gTotal.toLocaleString('ko-KR')} 중 1,000원 미만 ₩${trimmedGrand.toLocaleString('ko-KR')}은 절삭</td></tr>` : ''}`;
   }
 
   // 송금요청서: 작성자(직원)별 합산 + 직원명단에서 은행/계좌 매칭
@@ -1251,6 +1259,16 @@ function exportCashRequest() {
     rows.push([author, amt, d.c50000, d.c10000, d.c1000]);
   });
   rows.push(['합계', gTotal, g50, g10, g1]);
+  rows.push([]);
+  const truncGrand = truncateTo1000(gTotal);
+  const gd = denomBreakdown(truncGrand);
+  rows.push(['권종별 요약 (은행 인출용, 1,000원 미만 절삭)']);
+  rows.push(['금액','장수','총액']);
+  rows.push([50000, gd.c50000, gd.c50000*50000]);
+  rows.push([10000, gd.c10000, gd.c10000*10000]);
+  rows.push([1000, gd.c1000, gd.c1000*1000]);
+  rows.push(['', '', truncGrand]);
+  if (gTotal - truncGrand > 0) rows.push([`* 실제 요청 합계 ₩${gTotal.toLocaleString('ko-KR')} 중 1,000원 미만 ₩${(gTotal-truncGrand).toLocaleString('ko-KR')}은 절삭됨`]);
   dlCSV(rows, `시스디자인_${month}_현금인출요청서.csv`);
 }
 
