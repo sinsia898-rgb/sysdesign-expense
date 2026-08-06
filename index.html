@@ -385,7 +385,7 @@ tbody td.wrap{white-space:normal;max-width:160px}
             <button class="btn-excel" onclick="exportTransferRequest()">📥 엑셀</button>
           </div>
           <div class="table-wrap">
-            <table><thead><tr><th>지점</th><th style="text-align:right">송금액</th></tr></thead>
+            <table><thead><tr><th>이름</th><th>지점</th><th>은행명</th><th>계좌번호</th><th style="text-align:right">송금액</th></tr></thead>
             <tbody id="transfer-tbody"></tbody></table>
             <div class="empty-state" id="transfer-empty" style="display:none">해당 월 대기 내역이 없습니다</div>
           </div>
@@ -396,7 +396,7 @@ tbody td.wrap{white-space:normal;max-width:160px}
       <div id="sub-staff" class="subpage">
         <div class="ledger-form">
           <h3>직원 명단 업로드 (엑셀)</h3>
-          <p style="font-size:12px;color:var(--gray-400);margin-bottom:12px">첫 번째 시트 기준, "이름"과 "구분"(사무실+직영쇼룸 / 백화점) 열이 있는 엑셀 파일을 올려주세요. 업로드하면 기존 명단을 덮어씁니다.</p>
+          <p style="font-size:12px;color:var(--gray-400);margin-bottom:12px">첫 번째 시트 기준, "이름" / "구분"(사무실+직영쇼룸 / 백화점 · 지점명) / "은행명" / "계좌번호" 열이 있는 엑셀 파일을 올려주세요. 업로드하면 기존 명단을 덮어씁니다.</p>
           <input type="file" accept=".xlsx,.xls" id="staff-file" onchange="uploadStaffFile(this)">
         </div>
 
@@ -408,7 +408,7 @@ tbody td.wrap{white-space:normal;max-width:160px}
         </div>
 
         <div class="table-wrap">
-          <table><thead><tr><th>이름</th><th>소속</th><th>이번 달 제출 여부</th></tr></thead>
+          <table><thead><tr><th>이름</th><th>소속</th><th>은행명</th><th>계좌번호</th><th>이번 달 제출 여부</th></tr></thead>
           <tbody id="staff-tbody"></tbody></table>
           <div class="empty-state" id="staff-empty" style="display:none">등록된 직원 명단이 없습니다</div>
         </div>
@@ -838,7 +838,10 @@ async function loadLedger() {
 }
 async function loadStaff() {
   const rows = await apiGet('getStaff');
-  staffList = rows.map(r => ({ name: r['이름'], division: r['구분'] || '' }));
+  staffList = rows.map(r => ({
+    name: r['이름'], division: r['구분'] || '',
+    bank: r['은행명'] || '', account: r['계좌번호'] || ''
+  }));
 }
 
 // ── 관리자
@@ -1176,19 +1179,29 @@ function renderSettlement() {
         <td style="text-align:right">${g50}장</td><td style="text-align:right">${g10}장</td><td style="text-align:right">${g1}장</td></tr>`;
   }
 
-  // 송금요청서: 지점(구분 문자열)별 합산
-  const byStore = {};
-  deptSubs.forEach(s => { const key = s.division || '백화점'; byStore[key] = (byStore[key]||0) + s.monthlyTotal; });
-  const storeRows = Object.entries(byStore);
-  if (!storeRows.length) {
+  // 송금요청서: 작성자(직원)별 합산 + 직원명단에서 은행/계좌 매칭
+  const byAuthorDept = {};
+  deptSubs.forEach(s => {
+    if (!byAuthorDept[s.author]) byAuthorDept[s.author] = { amount: 0, division: s.division || '백화점' };
+    byAuthorDept[s.author].amount += s.monthlyTotal;
+  });
+  const staffMap = {};
+  staffList.forEach(st => { staffMap[st.name] = st; });
+  const transferRows = Object.entries(byAuthorDept);
+  if (!transferRows.length) {
     transferTbody.innerHTML=''; transferEmpty.style.display='block'; transferEmpty.textContent='해당 월 대기 내역이 없습니다';
   } else {
     transferEmpty.style.display='none';
     let gTotal=0;
-    transferTbody.innerHTML = storeRows.map(([store, amt]) => {
-      gTotal += amt;
-      return `<tr><td>${store}</td><td style="text-align:right;font-weight:700">₩${amt.toLocaleString('ko-KR')}</td></tr>`;
-    }).join('') + `<tr style="background:var(--gray-100);font-weight:800"><td>합계</td><td style="text-align:right">₩${gTotal.toLocaleString('ko-KR')}</td></tr>`;
+    transferTbody.innerHTML = transferRows.map(([author, info]) => {
+      gTotal += info.amount;
+      const st = staffMap[author] || {};
+      const bankMissing = !st.bank || !st.account;
+      return `<tr><td>${author}</td><td>${info.division}</td>
+        <td${bankMissing?' style="color:var(--red)"':''}>${st.bank || '⚠️ 미등록'}</td>
+        <td${bankMissing?' style="color:var(--red)"':''}>${st.account || '⚠️ 미등록'}</td>
+        <td style="text-align:right;font-weight:700">₩${info.amount.toLocaleString('ko-KR')}</td></tr>`;
+    }).join('') + `<tr style="background:var(--gray-100);font-weight:800"><td colspan="4">합계</td><td style="text-align:right">₩${gTotal.toLocaleString('ko-KR')}</td></tr>`;
   }
 }
 
@@ -1213,12 +1226,21 @@ function exportTransferRequest() {
   const month = document.getElementById('st-month').value;
   if (!month) { showToast('월을 먼저 선택해주세요'); return; }
   const deptSubs = settlementSubs(month).filter(s => matchDivision(s.division, '백화점'));
-  const byStore = {};
-  deptSubs.forEach(s => { const key = s.division || '백화점'; byStore[key] = (byStore[key]||0) + s.monthlyTotal; });
-  const rows = [['지점','송금액']];
+  const byAuthorDept = {};
+  deptSubs.forEach(s => {
+    if (!byAuthorDept[s.author]) byAuthorDept[s.author] = { amount: 0, division: s.division || '백화점' };
+    byAuthorDept[s.author].amount += s.monthlyTotal;
+  });
+  const staffMap = {};
+  staffList.forEach(st => { staffMap[st.name] = st; });
+  const rows = [['이름','지점','은행명','계좌번호','송금액']];
   let gTotal=0;
-  Object.entries(byStore).forEach(([store, amt]) => { gTotal+=amt; rows.push([store, amt]); });
-  rows.push(['합계', gTotal]);
+  Object.entries(byAuthorDept).forEach(([author, info]) => {
+    gTotal += info.amount;
+    const st = staffMap[author] || {};
+    rows.push([author, info.division, st.bank || '미등록', st.account || '미등록', info.amount]);
+  });
+  rows.push(['합계','','','', gTotal]);
   dlCSV(rows, `시스디자인_${month}_송금요청서.csv`);
 }
 
@@ -1235,7 +1257,9 @@ function uploadStaffFile(input) {
       const json = XLSX.utils.sheet_to_json(ws);
       const list = json.map(row => ({
         name: String(row['이름'] || row['name'] || '').trim(),
-        division: String(row['구분'] || row['division'] || '').trim()
+        division: String(row['구분'] || row['division'] || '').trim(),
+        bank: String(row['은행명'] || row['bank'] || '').trim(),
+        account: String(row['계좌번호'] || row['account'] || '').trim()
       })).filter(r => r.name);
       if (!list.length) { showToast('이름 열을 찾을 수 없어요. 헤더를 확인해주세요'); return; }
       showToast('업로드 중...');
@@ -1268,7 +1292,7 @@ function renderStaff() {
     if (done) doneCount++;
     const badge = !month ? '<span style="color:var(--gray-400)">월을 선택하세요</span>'
       : done ? '<span class="badge badge-paid">✅ 제출완료</span>' : '<span class="badge badge-rejected">❌ 미제출</span>';
-    return `<tr><td>${st.name}</td><td>${st.division}</td><td>${badge}</td></tr>`;
+    return `<tr><td>${st.name}</td><td>${st.division}</td><td>${st.bank||'-'}</td><td>${st.account||'-'}</td><td>${badge}</td></tr>`;
   }).join('');
   document.getElementById('staff-summary').textContent = month ? `제출완료 ${doneCount} / 전체 ${staffList.length}명` : '';
 }
