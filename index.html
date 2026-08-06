@@ -887,6 +887,19 @@ function switchSub(p, btn) {
 }
 
 // 구분 매칭: '백화점' 필터는 '백화점 · 롯데동탄' 등 모두 포함
+// 접수 1건의 실제 금액 = 영수증 항목 금액의 합 (사람이 입력한 monthlyTotal이 아닌 실제 항목 기준)
+// 여러 번 나눠 접수해도 항목 기준이라 중복 합산되지 않음
+function subTotal(sub) {
+  return sub.items.reduce((s, i) => s + i.amount, 0);
+}
+// 요청금액 셀: 항목 합계를 기준으로 표시하되, 작성자가 직접 입력한 금액과 다르면 경고 아이콘 표시
+function reqAmtCell(sub) {
+  const itemSum = subTotal(sub);
+  const typed = sub.monthlyTotal;
+  const diff = typed !== itemSum;
+  return `₩${itemSum.toLocaleString('ko-KR')}` + (diff ? ` <span title="작성자 입력값: ₩${typed.toLocaleString('ko-KR')}" style="color:var(--red);cursor:help">⚠️</span>` : '');
+}
+
 function matchDivision(subDiv, filter) {
   if (!filter) return true;
   return String(subDiv).startsWith(filter);
@@ -921,8 +934,8 @@ function renderReceipts() {
   const paid = submissions.filter(s=>s.status==='paid');
   document.getElementById('receipt-stats').innerHTML = `
     <div class="stat-card"><div class="stat-label">대기 건수</div><div class="stat-value sv-yellow">${pending.length}건</div></div>
-    <div class="stat-card"><div class="stat-label">대기 금액</div><div class="stat-value sv-red">₩${pending.reduce((s,x)=>s+x.monthlyTotal,0).toLocaleString('ko-KR')}</div></div>
-    <div class="stat-card"><div class="stat-label">지급 완료</div><div class="stat-value sv-green">₩${paid.reduce((s,x)=>s+x.monthlyTotal,0).toLocaleString('ko-KR')}</div></div>`;
+    <div class="stat-card"><div class="stat-label">대기 금액</div><div class="stat-value sv-red">₩${pending.reduce((s,x)=>s+subTotal(x),0).toLocaleString('ko-KR')}</div></div>
+    <div class="stat-card"><div class="stat-label">지급 완료</div><div class="stat-value sv-green">₩${paid.reduce((s,x)=>s+subTotal(x),0).toLocaleString('ko-KR')}</div></div>`;
 
   const flat = [];
   data.forEach(sub => sub.items.forEach((item,idx) => flat.push({sub,item,idx,rowspan:sub.items.length})));
@@ -939,7 +952,7 @@ function renderReceipts() {
     <td>${item.date}</td><td class="wrap">${item.content}</td><td>${item.place}</td>
     <td>${photoCell(item.photoUrl)}</td>
     <td style="text-align:right">₩${item.amount.toLocaleString('ko-KR')}</td>
-    ${idx===0?`<td rowspan="${rowspan}" style="text-align:right;font-weight:700">₩${sub.monthlyTotal.toLocaleString('ko-KR')}</td><td rowspan="${rowspan}">${sl[sub.status]}</td><td rowspan="${rowspan}">${ab(sub)}</td>`:''}
+    ${idx===0?`<td rowspan="${rowspan}" style="text-align:right;font-weight:700">${reqAmtCell(sub)}</td><td rowspan="${rowspan}">${sl[sub.status]}</td><td rowspan="${rowspan}">${ab(sub)}</td>`:''}
   </tr>`).join('');
 }
 async function setReceiptStatus(id,status) {
@@ -1163,7 +1176,7 @@ function renderSettlement() {
 
   // 현금 인출요청서: 작성자별 합산
   const byAuthor = {};
-  officeSubs.forEach(s => { byAuthor[s.author] = (byAuthor[s.author]||0) + s.monthlyTotal; });
+  officeSubs.forEach(s => { byAuthor[s.author] = (byAuthor[s.author]||0) + subTotal(s); });
   const authorRows = Object.entries(byAuthor);
   if (!authorRows.length) {
     cashTbody.innerHTML=''; cashEmpty.style.display='block'; cashEmpty.textContent='해당 월 대기 내역이 없습니다';
@@ -1184,7 +1197,7 @@ function renderSettlement() {
   const byAuthorDept = {};
   deptSubs.forEach(s => {
     if (!byAuthorDept[s.author]) byAuthorDept[s.author] = { amount: 0, division: s.division || '백화점' };
-    byAuthorDept[s.author].amount += s.monthlyTotal;
+    byAuthorDept[s.author].amount += subTotal(s);
   });
   const staffMap = {};
   staffList.forEach(st => { staffMap[st.name] = st; });
@@ -1211,7 +1224,7 @@ function exportCashRequest() {
   if (!month) { showToast('월을 먼저 선택해주세요'); return; }
   const officeSubs = settlementSubs(month).filter(s => matchDivision(s.division, '사무실+직영쇼룸'));
   const byAuthor = {};
-  officeSubs.forEach(s => { byAuthor[s.author] = (byAuthor[s.author]||0) + s.monthlyTotal; });
+  officeSubs.forEach(s => { byAuthor[s.author] = (byAuthor[s.author]||0) + subTotal(s); });
   const rows = [['작성자','요청금액','5만원권','1만원권','1천원권']];
   let gTotal=0,g50=0,g10=0,g1=0;
   Object.entries(byAuthor).forEach(([author, amt]) => {
@@ -1230,7 +1243,7 @@ function exportTransferRequest() {
   const byAuthorDept = {};
   deptSubs.forEach(s => {
     if (!byAuthorDept[s.author]) byAuthorDept[s.author] = { amount: 0, division: s.division || '백화점' };
-    byAuthorDept[s.author].amount += s.monthlyTotal;
+    byAuthorDept[s.author].amount += subTotal(s);
   });
   const staffMap = {};
   staffList.forEach(st => { staffMap[st.name] = st; });
