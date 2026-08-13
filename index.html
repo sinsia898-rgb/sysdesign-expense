@@ -1094,15 +1094,14 @@ function buildDeptExpenseSheetRows(month) {
 
   const monthNum = parseMonthLabel(month);
   const aoa = [];
-  aoa.push([]);
-  const titleRow = []; titleRow[1] = `${monthNum}월 백화점 지출결의서`; aoa.push(titleRow);
-  aoa.push([]);
+  aoa.push([]); // row1 빈 줄
+  aoa.push([`${monthNum}월 백화점 지출결의서`]); // row2: A열
+  aoa.push([]); // row3 빈 줄
   let grandTotal = 0;
   authors.forEach(a => { grandTotal += byAuthor[a].items.reduce((s, i) => s + i.amount, 0); });
-  const totalRow = []; totalRow[1] = `${monthNum}월 총 지출계 :`; totalRow[4] = grandTotal;
-  aoa.push(totalRow);
-  aoa.push([]);
-  aoa.push(['지점명', '작성자', '작성일자', '지출금액', '총합', '내용', '지급처', '증빙서류', '비고']);
+  aoa.push([`${monthNum}월 총 지출계 :`, grandTotal]); // row4: A/B열
+  aoa.push([]); // row5 빈 줄
+  aoa.push(['지점명', '작성자', '작성일자', '지출금액', '총합', '내용', '지급처', '증빙서류']); // row6 헤더
 
   const merges = [];
   authors.forEach(a => {
@@ -1115,7 +1114,7 @@ function buildDeptExpenseSheetRows(month) {
         idx === 0 ? a : '',
         item.date, item.amount,
         idx === 0 ? authorTotal : '',
-        item.content, item.place, '영수증', ''
+        item.content, item.place, '영수증'
       ]);
     });
     const endRow = aoa.length - 1;
@@ -1126,7 +1125,7 @@ function buildDeptExpenseSheetRows(month) {
     }
   });
 
-  aoa.push(['', `${monthNum}월 합계`, '', grandTotal, '', '', '', '', '']);
+  aoa.push(['', `${monthNum}월 합계`, '', grandTotal, '', '', '', '']); // 마지막 합계 행: B열 라벨, D열 금액
   return { aoa, merges, monthNum };
 }
 
@@ -1138,8 +1137,8 @@ function exportReceipts() {
   if (fd === '백화점') {
     const { aoa, merges, monthNum } = buildDeptExpenseSheetRows(fm);
     const ws = XLSX.utils.aoa_to_sheet(aoa);
-    ws['!merges'] = [{ s:{r:1,c:1}, e:{r:1,c:4} }, ...merges];
-    ws['!cols'] = [{wch:18},{wch:10},{wch:12},{wch:11},{wch:11},{wch:26},{wch:14},{wch:10},{wch:10}];
+    ws['!merges'] = merges;
+    ws['!cols'] = [{wch:18.78},{wch:10.78},{wch:12.78},{wch:11.78},{wch:8.43},{wch:26.78},{wch:14.78},{wch:10.78}];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, (fm + ' 백화점').substring(0,30));
     XLSX.writeFile(wb, `시스디자인_${fm}_백화점_지출결의서.xlsx`);
