@@ -1074,10 +1074,79 @@ function buildExpenseSheetRows(month, division) {
   aoa.push(balRow);
   return aoa;
 }
+// 백화점 · 물류센터 전용 엑셀: 지점명 + 사람별 그룹 + 개인 총합
+function buildDeptExpenseSheetRows(month) {
+  const deptSubs = submissions.filter(s => s.month === month && matchDivision(s.division, '백화점'));
+
+  const byAuthor = {}; // author -> { store, items:[{date,amount,content,place}] }
+  deptSubs.forEach(sub => {
+    const parts = String(sub.division || '').split('·');
+    const storeName = parts[1] ? parts[1].trim() : (sub.division || '백화점');
+    if (!byAuthor[sub.author]) byAuthor[sub.author] = { store: storeName, items: [] };
+    sub.items.forEach(item => byAuthor[sub.author].items.push({ date: item.date, amount: item.amount, content: item.content, place: item.place }));
+  });
+
+  const authors = Object.keys(byAuthor).sort((a, b) => {
+    const sa = byAuthor[a].store, sb = byAuthor[b].store;
+    return sa !== sb ? sa.localeCompare(sb) : a.localeCompare(b);
+  });
+  authors.forEach(a => byAuthor[a].items.sort((x, y) => String(x.date).localeCompare(String(y.date))));
+
+  const monthNum = parseMonthLabel(month);
+  const aoa = [];
+  aoa.push([]);
+  const titleRow = []; titleRow[1] = `${monthNum}월 백화점 지출결의서`; aoa.push(titleRow);
+  aoa.push([]);
+  let grandTotal = 0;
+  authors.forEach(a => { grandTotal += byAuthor[a].items.reduce((s, i) => s + i.amount, 0); });
+  const totalRow = []; totalRow[1] = `${monthNum}월 총 지출계 :`; totalRow[4] = grandTotal;
+  aoa.push(totalRow);
+  aoa.push([]);
+  aoa.push(['지점명', '작성자', '작성일자', '지출금액', '총합', '내용', '지급처', '증빙서류', '비고']);
+
+  const merges = [];
+  authors.forEach(a => {
+    const info = byAuthor[a];
+    const authorTotal = info.items.reduce((s, i) => s + i.amount, 0);
+    const startRow = aoa.length;
+    info.items.forEach((item, idx) => {
+      aoa.push([
+        idx === 0 ? info.store : '',
+        idx === 0 ? a : '',
+        item.date, item.amount,
+        idx === 0 ? authorTotal : '',
+        item.content, item.place, '영수증', ''
+      ]);
+    });
+    const endRow = aoa.length - 1;
+    if (endRow > startRow) {
+      merges.push({ s: { r: startRow, c: 0 }, e: { r: endRow, c: 0 } });
+      merges.push({ s: { r: startRow, c: 1 }, e: { r: endRow, c: 1 } });
+      merges.push({ s: { r: startRow, c: 4 }, e: { r: endRow, c: 4 } });
+    }
+  });
+
+  aoa.push(['', `${monthNum}월 합계`, '', grandTotal, '', '', '', '', '']);
+  return { aoa, merges, monthNum };
+}
+
 function exportReceipts() {
   const fm = document.getElementById('f-month').value;
   if (!fm) { showToast('월을 먼저 선택해주세요 (엑셀은 월별로 다운로드됩니다)'); return; }
   const fd = document.getElementById('f-division').value;
+
+  if (fd === '백화점') {
+    const { aoa, merges, monthNum } = buildDeptExpenseSheetRows(fm);
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!merges'] = [{ s:{r:1,c:1}, e:{r:1,c:4} }, ...merges];
+    ws['!cols'] = [{wch:18},{wch:10},{wch:12},{wch:11},{wch:11},{wch:26},{wch:14},{wch:10},{wch:10}];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, (fm + ' 백화점').substring(0,30));
+    XLSX.writeFile(wb, `시스디자인_${fm}_백화점_지출결의서.xlsx`);
+    showToast('📥 다운로드 완료');
+    return;
+  }
+
   const aoa = buildExpenseSheetRows(fm, fd);
   const ws = XLSX.utils.aoa_to_sheet(aoa);
   ws['!merges'] = [{ s:{r:1,c:1}, e:{r:2,c:7} },{ s:{r:5,c:5}, e:{r:5,c:7} }];
