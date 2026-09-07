@@ -311,7 +311,7 @@ tbody td.wrap{white-space:normal;max-width:160px}
           <select id="f-division" onchange="renderReceipts()">
             <option value="">전체 구분</option>
             <option value="사무실+직영쇼룸">사무실+직영쇼룸</option>
-            <option value="백화점">백화점</option>
+            <option value="백화점">백화점·물류센터</option>
           </select>
           <select id="f-status" onchange="renderReceipts()">
             <option value="">전체 상태</option>
@@ -337,7 +337,7 @@ tbody td.wrap{white-space:normal;max-width:160px}
           <select id="bf-division" onchange="renderBooks()">
             <option value="">전체 구분</option>
             <option value="사무실+직영쇼룸">사무실+직영쇼룸</option>
-            <option value="백화점">백화점</option>
+            <option value="백화점">백화점·물류센터</option>
           </select>
           <select id="bf-status" onchange="renderBooks()">
             <option value="">전체 상태</option>
@@ -461,7 +461,7 @@ tbody td.wrap{white-space:normal;max-width:160px}
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbyszZdZzNexza30CagR-EI_L3y-YPESeww7pKhoQvc8-Qxm2DXXjdcqgRvp_FekcUjp4Q/exec';
 const ADMIN_PW = '1234';
-const STORES = ['롯데일산','롯데광주','롯데수원','롯데동탄','롯데대전','롯데대구','롯데김포','롯데광복','롯데몰 메종동부산'];
+const STORES = ['롯데일산','롯데광주','롯데수원','롯데동탄','롯데대전','롯데대구','롯데김포','롯데광복','롯데몰 메종동부산','물류센터'];
 const BOOK_RATIO = 50; // 도서 지원 비율 (%)
 
 let submissions = [];
@@ -911,7 +911,7 @@ function reqAmtCell(sub) {
 
 function matchDivision(subDiv, filter) {
   if (!filter) return true;
-  return String(subDiv).startsWith(filter);
+  return String(subDiv).trim().startsWith(filter);
 }
 
 // 사진 셀: 마우스 올리면 미리보기, 클릭하면 원본
@@ -1095,7 +1095,7 @@ function buildDeptExpenseSheetRows(month) {
   const monthNum = parseMonthLabel(month);
   const aoa = [];
   aoa.push([]); // row1 빈 줄
-  aoa.push([`${monthNum}월 백화점 지출결의서`]); // row2: A열
+  aoa.push([`${monthNum}월 백화점·물류센터 지출결의서`]); // row2: A열
   aoa.push([]); // row3 빈 줄
   let grandTotal = 0;
   authors.forEach(a => { grandTotal += byAuthor[a].items.reduce((s, i) => s + i.amount, 0); });
